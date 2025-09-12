@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using Scans.InternetExposure.DataClases;
 
-namespace Scans.InternetExposure
+namespace Scans.InternetExposure.ScanLogic
 {
     public class PortScanner
     {
@@ -88,7 +89,7 @@ namespace Scans.InternetExposure
                             stream.WriteTimeout = 2000; // 2 seconds
 
                             // Send a simple probe
-                            byte[] probe = System.Text.Encoding.ASCII.GetBytes("\r\n");
+                            byte[] probe = Encoding.ASCII.GetBytes("\r\n");
                             stream.Write(probe, 0, probe.Length);
 
                             // Try to read response with timeout
@@ -99,7 +100,7 @@ namespace Scans.InternetExposure
                             {
                                 bytesRead = stream.Read(buffer, 0, buffer.Length);
                             }
-                            catch (System.IO.IOException)
+                            catch (IOException)
                             {
                                 // Timeout occurred, which is normal for many services
                                 bytesRead = 0;
@@ -108,7 +109,7 @@ namespace Scans.InternetExposure
 
                             if (bytesRead > 0)
                             {
-                                item.banner = System.Text.Encoding.ASCII.GetString(buffer, 0, bytesRead).Trim();
+                                item.banner = Encoding.ASCII.GetString(buffer, 0, bytesRead).Trim();
                                 item.service = DetectService(item.portNumber, item.banner);
                             }
                             else

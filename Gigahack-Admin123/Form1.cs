@@ -1,4 +1,4 @@
-using Scans.InternetExposure;
+using Scans.InternetExposure.ScanLogic;
 using System.Net;
 
 namespace Gigahack_Admin123

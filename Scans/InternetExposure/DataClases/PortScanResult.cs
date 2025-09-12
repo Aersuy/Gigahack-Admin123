@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Scans.InternetExposure
+namespace Scans.InternetExposure.DataClases
 {
     public class PortScanResult
     {
