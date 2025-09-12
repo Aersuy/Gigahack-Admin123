@@ -24,6 +24,11 @@ namespace Scans.InternetExposure.DataClases
         public DateTime CertificateValidTo { get; set; }
 
         public string HSTS { get; set; }
+        public string ContentSecurityPolicy { get; set; }
+        public string XFrameOptions { get; set; }
+        public string XContentTypeOptions { get; set; }
+        public string ReferrerPolicy { get; set; }
+        public string PermissionsPolicy { get; set; }
 
 
     }
