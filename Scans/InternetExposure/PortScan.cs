@@ -81,6 +81,7 @@ namespace Scans.InternetExposure
                     item.open = true;
                     try
                     {
+                        // Why no async
                         using (NetworkStream stream = scan.GetStream())
                         {
                             stream.ReadTimeout = 2000; // 2 seconds
@@ -103,6 +104,7 @@ namespace Scans.InternetExposure
                                 // Timeout occurred, which is normal for many services
                                 bytesRead = 0;
                             }
+
 
                             if (bytesRead > 0)
                             {
