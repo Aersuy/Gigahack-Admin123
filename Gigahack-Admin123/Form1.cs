@@ -113,11 +113,16 @@ namespace Gigahack_Admin123
                 // Update UI on main thread
                 this.Invoke(new Action(() =>
                 {
-                    for (int i = 0; i < results.Count; i++)
+                    foreach (var result in results)
                     {
-                        if (results[i]) // Port is open
+                        if (result.open)
                         {
-                            lstResults.Items.Add($"Port {i} - OPEN");
+                            string displayText = $"Port {result.portNumber} ({result.service}) - OPEN";
+                            if (!string.IsNullOrEmpty(result.banner))
+                            {
+                                displayText += $" - {result.banner.Trim()}";
+                            }
+                            lstResults.Items.Add(displayText);
                             openPortsCount++;
                         }
                         else
@@ -126,7 +131,7 @@ namespace Gigahack_Admin123
                         }
                         
                         // Update progress
-                        progressBar.Value = i + 1;
+                        progressBar.Value++;
                         UpdatePortCounts();
                     }
                     
@@ -163,16 +168,20 @@ namespace Gigahack_Admin123
             {
                 // Call your synchronous ScanCommonPorts method
                 var results = portScanner.ScanCommonPorts(ipAddress);
-                int[] commonPorts = { 21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995, 3389, 5900, 8080 };
                 
                 // Update UI on main thread
                 this.Invoke(new Action(() =>
                 {
-                    for (int i = 0; i < results.Count; i++)
+                    foreach (var result in results)
                     {
-                        if (results[i]) // Port is open
+                        if (result.open)
                         {
-                            lstResults.Items.Add($"Port {commonPorts[i]} - OPEN");
+                            string displayText = $"Port {result.portNumber} ({result.service}) - OPEN";
+                            if (!string.IsNullOrEmpty(result.banner))
+                            {
+                                displayText += $" - {result.banner.Trim()}";
+                            }
+                            lstResults.Items.Add(displayText);
                             openPortsCount++;
                         }
                         else
@@ -181,7 +190,7 @@ namespace Gigahack_Admin123
                         }
                         
                         // Update progress
-                        progressBar.Value = i + 1;
+                        progressBar.Value++;
                         UpdatePortCounts();
                     }
                     
