@@ -14,75 +14,26 @@ namespace Gigahack_Admin123
         {
             InitializeComponent();
             portScanner = new PortScanner();
-            
-            // Subscribe to port scanner events
-            portScanner.PortScanned += OnPortScanned;
-            portScanner.ProgressUpdated += OnProgressUpdated;
-            portScanner.StatusChanged += OnStatusChanged;
         }
 
-        private async void btnScan_Click(object sender, EventArgs e)
+        private void btnScan_Click(object sender, EventArgs e)
         {
-            await StartScanAsync();
+            StartScan();
         }
 
-        // Event handlers for port scanner events
-        private void OnPortScanned(int port, bool isOpen)
-        {
-            // Update UI on the main thread
-            this.Invoke(new Action(() =>
-            {
-                if (isOpen)
-                {
-                    lstResults.Items.Add($"Port {port} - OPEN");
-                    openPortsCount++;
-                }
-                else
-                {
-                    closedPortsCount++;
-                }
-                UpdatePortCounts();
-            }));
-        }
-
-        private void OnProgressUpdated(int completed, int total)
-        {
-            // Update progress bar on the main thread
-            this.Invoke(new Action(() =>
-            {
-                progressBar.Value = completed;
-            }));
-        }
-
-        private void OnStatusChanged(string status)
-        {
-            // Update status label on the main thread
-            this.Invoke(new Action(() =>
-            {
-                lblStatus.Text = status;
-            }));
-        }
-
-        private void btnStop_Click(object sender, EventArgs e)
-        {
-            cancellationTokenSource?.Cancel();
-            lblStatus.Text = "Stopping scan...";
-        }
-
-        private void UpdatePortCounts()
-        {
-            lblOpenPorts.Text = $"Open: {openPortsCount}";
-            lblClosedPorts.Text = $"Closed: {closedPortsCount}";
-        }
-
-        private async void btnScanLocalhost_Click(object sender, EventArgs e)
+        private void btnScanLocalhost_Click(object sender, EventArgs e)
         {
             // Set localhost IP and start scan
             txtTargetIP.Text = "127.0.0.1";
-            await StartScanAsync();
+            StartScan();
         }
 
-        private async Task StartScanAsync()
+        private void btnScanCommon_Click(object sender, EventArgs e)
+        {
+            StartCommonPortScan();
+        }
+
+        private void StartScan()
         {
             if (string.IsNullOrWhiteSpace(txtTargetIP.Text))
             {
@@ -107,36 +58,171 @@ namespace Gigahack_Admin123
             // Update UI state
             btnScan.Enabled = false;
             btnScanLocalhost.Enabled = false;
+            btnScanCommon.Enabled = false;
             btnStop.Enabled = true;
+            lblStatus.Text = "Scanning...";
             txtTargetIP.Enabled = false;
             numMaxPorts.Enabled = false;
 
-            // Create cancellation token
-            cancellationTokenSource = new CancellationTokenSource();
+            // Run scan on background thread to prevent UI freezing
+            Task.Run(() => PerformScan(txtTargetIP.Text, (int)numMaxPorts.Value));
+        }
 
+        private void StartCommonPortScan()
+        {
+            if (string.IsNullOrWhiteSpace(txtTargetIP.Text))
+            {
+                MessageBox.Show("Please enter a target IP address.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!IPAddress.TryParse(txtTargetIP.Text, out _))
+            {
+                MessageBox.Show("Please enter a valid IP address.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Reset UI
+            lstResults.Items.Clear();
+            openPortsCount = 0;
+            closedPortsCount = 0;
+            UpdatePortCounts();
+            progressBar.Value = 0;
+            progressBar.Maximum = 14; // 14 common ports
+
+            // Update UI state
+            btnScan.Enabled = false;
+            btnScanLocalhost.Enabled = false;
+            btnScanCommon.Enabled = false;
+            btnStop.Enabled = true;
+            lblStatus.Text = "Scanning common ports...";
+            txtTargetIP.Enabled = false;
+            numMaxPorts.Enabled = false;
+
+            // Run scan on background thread to prevent UI freezing
+            Task.Run(() => PerformCommonPortScan(txtTargetIP.Text));
+        }
+
+        private void PerformScan(string ipAddress, int maxPorts)
+        {
             try
             {
-                await portScanner.ScanWithProgressAsync(txtTargetIP.Text, (int)numMaxPorts.Value, 1000, cancellationTokenSource.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                // Status will be updated by the event handler
+                // Call your synchronous AllPortScan method
+                var results = portScanner.AllPortScan(ipAddress);
+                
+                // Update UI on main thread
+                this.Invoke(new Action(() =>
+                {
+                    for (int i = 0; i < results.Count; i++)
+                    {
+                        if (results[i]) // Port is open
+                        {
+                            lstResults.Items.Add($"Port {i} - OPEN");
+                            openPortsCount++;
+                        }
+                        else
+                        {
+                            closedPortsCount++;
+                        }
+                        
+                        // Update progress
+                        progressBar.Value = i + 1;
+                        UpdatePortCounts();
+                    }
+                    
+                    lblStatus.Text = "Scan completed";
+                }));
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occurred during scanning: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                lblStatus.Text = "Error occurred";
+                this.Invoke(new Action(() =>
+                {
+                    MessageBox.Show($"An error occurred during scanning: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    lblStatus.Text = "Error occurred";
+                }));
             }
             finally
             {
-                // Reset UI state
-                btnScan.Enabled = true;
-                btnScanLocalhost.Enabled = true;
-                btnStop.Enabled = false;
-                txtTargetIP.Enabled = true;
-                numMaxPorts.Enabled = true;
-                progressBar.Value = progressBar.Maximum;
+                // Reset UI state on main thread
+                this.Invoke(new Action(() =>
+                {
+                    btnScan.Enabled = true;
+                    btnScanLocalhost.Enabled = true;
+                    btnScanCommon.Enabled = true;
+                    btnStop.Enabled = false;
+                    txtTargetIP.Enabled = true;
+                    numMaxPorts.Enabled = true;
+                    progressBar.Value = progressBar.Maximum;
+                }));
             }
+        }
+
+        private void PerformCommonPortScan(string ipAddress)
+        {
+            try
+            {
+                // Call your synchronous ScanCommonPorts method
+                var results = portScanner.ScanCommonPorts(ipAddress);
+                int[] commonPorts = { 21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995, 3389, 5900, 8080 };
+                
+                // Update UI on main thread
+                this.Invoke(new Action(() =>
+                {
+                    for (int i = 0; i < results.Count; i++)
+                    {
+                        if (results[i]) // Port is open
+                        {
+                            lstResults.Items.Add($"Port {commonPorts[i]} - OPEN");
+                            openPortsCount++;
+                        }
+                        else
+                        {
+                            closedPortsCount++;
+                        }
+                        
+                        // Update progress
+                        progressBar.Value = i + 1;
+                        UpdatePortCounts();
+                    }
+                    
+                    lblStatus.Text = "Common ports scan completed";
+                }));
+            }
+            catch (Exception ex)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    MessageBox.Show($"An error occurred during scanning: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    lblStatus.Text = "Error occurred";
+                }));
+            }
+            finally
+            {
+                // Reset UI state on main thread
+                this.Invoke(new Action(() =>
+                {
+                    btnScan.Enabled = true;
+                    btnScanLocalhost.Enabled = true;
+                    btnScanCommon.Enabled = true;
+                    btnStop.Enabled = false;
+                    txtTargetIP.Enabled = true;
+                    numMaxPorts.Enabled = true;
+                    progressBar.Value = progressBar.Maximum;
+                }));
+            }
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            // For synchronous scanning, you might want to add a cancellation flag
+            lblStatus.Text = "Stopping scan...";
+            // Note: You'll need to add cancellation logic to your AllPortScan method for this to work properly
+        }
+
+        private void UpdatePortCounts()
+        {
+            lblOpenPorts.Text = $"Open: {openPortsCount}";
+            lblClosedPorts.Text = $"Closed: {closedPortsCount}";
         }
     }
 }

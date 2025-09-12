@@ -33,6 +33,7 @@
             this.txtTargetIP = new TextBox();
             this.btnScan = new Button();
             this.btnScanLocalhost = new Button();
+            this.btnScanCommon = new Button();
             this.btnStop = new Button();
             this.progressBar = new ProgressBar();
             this.lblStatus = new Label();
@@ -110,13 +111,23 @@
             this.btnScanLocalhost.UseVisualStyleBackColor = true;
             this.btnScanLocalhost.Click += new EventHandler(this.btnScanLocalhost_Click);
             // 
+            // btnScanCommon
+            // 
+            this.btnScanCommon.Location = new Point(199, 85);
+            this.btnScanCommon.Name = "btnScanCommon";
+            this.btnScanCommon.Size = new Size(100, 30);
+            this.btnScanCommon.TabIndex = 7;
+            this.btnScanCommon.Text = "Scan Common";
+            this.btnScanCommon.UseVisualStyleBackColor = true;
+            this.btnScanCommon.Click += new EventHandler(this.btnScanCommon_Click);
+            // 
             // btnStop
             // 
             this.btnStop.Enabled = false;
-            this.btnStop.Location = new Point(199, 85);
+            this.btnStop.Location = new Point(305, 85);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new Size(75, 30);
-            this.btnStop.TabIndex = 7;
+            this.btnStop.TabIndex = 8;
             this.btnStop.Text = "Stop Scan";
             this.btnStop.UseVisualStyleBackColor = true;
             this.btnStop.Click += new EventHandler(this.btnStop_Click);
@@ -187,6 +198,7 @@
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnStop);
+            this.Controls.Add(this.btnScanCommon);
             this.Controls.Add(this.btnScanLocalhost);
             this.Controls.Add(this.btnScan);
             this.Controls.Add(this.numMaxPorts);
@@ -207,6 +219,7 @@
         private TextBox txtTargetIP;
         private Button btnScan;
         private Button btnScanLocalhost;
+        private Button btnScanCommon;
         private Button btnStop;
         private ProgressBar progressBar;
         private Label lblStatus;
