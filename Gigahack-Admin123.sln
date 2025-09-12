@@ -5,6 +5,10 @@ VisualStudioVersion = 17.14.36408.4 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gigahack-Admin123", "Gigahack-Admin123\Gigahack-Admin123.csproj", "{38D94FAE-5F36-4711-A054-524DE49ACBDD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scans", "Scans\Scans.csproj", "{3D4013CE-76AB-485B-8DF3-90B24071B649}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reports", "Reports\Reports.csproj", "{9376C9E5-DADA-44C7-9D6D-68EBE03AD7D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{38D94FAE-5F36-4711-A054-524DE49ACBDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38D94FAE-5F36-4711-A054-524DE49ACBDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38D94FAE-5F36-4711-A054-524DE49ACBDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D4013CE-76AB-485B-8DF3-90B24071B649}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D4013CE-76AB-485B-8DF3-90B24071B649}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D4013CE-76AB-485B-8DF3-90B24071B649}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D4013CE-76AB-485B-8DF3-90B24071B649}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9376C9E5-DADA-44C7-9D6D-68EBE03AD7D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9376C9E5-DADA-44C7-9D6D-68EBE03AD7D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9376C9E5-DADA-44C7-9D6D-68EBE03AD7D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9376C9E5-DADA-44C7-9D6D-68EBE03AD7D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
