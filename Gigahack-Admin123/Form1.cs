@@ -1,4 +1,5 @@
 using Scans.InternetExposure.ScanLogic;
+using Scans.InternetExposure.DataClases;
 using System.Net;
 
 namespace Gigahack_Admin123
@@ -6,6 +7,7 @@ namespace Gigahack_Admin123
     public partial class Form1 : Form
     {
         private PortScanner portScanner;
+        private EmailAuthScanner emailAuthScanner;
         private CancellationTokenSource? cancellationTokenSource;
         private int openPortsCount = 0;
         private int closedPortsCount = 0;
@@ -14,6 +16,7 @@ namespace Gigahack_Admin123
         {
             InitializeComponent();
             portScanner = new PortScanner();
+            emailAuthScanner = new EmailAuthScanner();
         }
 
         private void btnScan_Click(object sender, EventArgs e)
@@ -232,6 +235,148 @@ namespace Gigahack_Admin123
         {
             lblOpenPorts.Text = $"Open: {openPortsCount}";
             lblClosedPorts.Text = $"Closed: {closedPortsCount}";
+        }
+
+        // Email Authentication Methods
+        private void btnEmailAuth_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtTargetIP.Text))
+            {
+                MessageBox.Show("Please enter a domain to scan", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            btnEmailAuth.Enabled = false;
+            lblStatus.Text = "Scanning email authentication...";
+
+            try
+            {
+                // Run on background thread to prevent UI freezing
+                Task.Run(() => {
+                    var result = emailAuthScanner.ScanEmailAuth(txtTargetIP.Text);
+                    
+                    // Update UI on main thread
+                    this.Invoke(new Action(() => {
+                        DisplayEmailAuthResults(result);
+                        lblStatus.Text = "Email authentication scan completed";
+                    }));
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Email auth scan error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblStatus.Text = "Email auth scan failed";
+            }
+            finally
+            {
+                btnEmailAuth.Enabled = true;
+            }
+        }
+
+        private void DisplayEmailAuthResults(EmailAuthResult result)
+        {
+            lstResults.Items.Clear();
+            
+            lstResults.Items.Add($"=== Email Authentication Report for {result.Domain} ===");
+            lstResults.Items.Add($"Security Score: {result.SecurityScore}/100 (Grade: {result.SecurityGrade})");
+            lstResults.Items.Add($"Scan Time: {result.ScanTime:yyyy-MM-dd HH:mm:ss}");
+            lstResults.Items.Add("");
+            
+            // SPF Results
+            lstResults.Items.Add("=== SPF (Sender Policy Framework) ===");
+            lstResults.Items.Add($"Record Exists: {result.SPF.RecordExists}");
+            if (result.SPF.RecordExists)
+            {
+                lstResults.Items.Add($"Record: {result.SPF.Record}");
+                lstResults.Items.Add($"Valid: {result.SPF.IsValid}");
+                lstResults.Items.Add($"Qualifier: {result.SPF.Qualifier}");
+                if (result.SPF.Mechanisms.Any())
+                    lstResults.Items.Add($"Mechanisms: {string.Join(", ", result.SPF.Mechanisms)}");
+                if (result.SPF.Includes.Any())
+                    lstResults.Items.Add($"Includes: {string.Join(", ", result.SPF.Includes)}");
+            }
+            else
+            {
+                lstResults.Items.Add("No SPF record found");
+            }
+            lstResults.Items.Add("");
+            
+            // DKIM Results
+            lstResults.Items.Add("=== DKIM (DomainKeys Identified Mail) ===");
+            if (result.DKIM.Any())
+            {
+                foreach (var dkim in result.DKIM)
+                {
+                    lstResults.Items.Add($"Selector: {dkim.Selector}");
+                    lstResults.Items.Add($"Valid: {dkim.IsValid}");
+                    lstResults.Items.Add($"Key Length: {dkim.KeyLength} bits");
+                    lstResults.Items.Add($"Key Type: {dkim.KeyType}");
+                    if (!string.IsNullOrEmpty(dkim.Algorithm))
+                        lstResults.Items.Add($"Algorithm: {dkim.Algorithm}");
+                    if (!string.IsNullOrEmpty(dkim.HashAlgorithm))
+                        lstResults.Items.Add($"Hash Algorithm: {dkim.HashAlgorithm}");
+                    if (!string.IsNullOrEmpty(dkim.PublicKey))
+                    {
+                        lstResults.Items.Add($"Public Key: {dkim.PublicKey}");
+                        // Show truncated version for display
+                        var truncatedKey = dkim.PublicKey.Length > 50 ? 
+                            dkim.PublicKey.Substring(0, 50) + "..." : 
+                            dkim.PublicKey;
+                        lstResults.Items.Add($"Public Key (truncated): {truncatedKey}");
+                    }
+                    lstResults.Items.Add("");
+                }
+            }
+            else
+            {
+                lstResults.Items.Add("No DKIM records found");
+            }
+            lstResults.Items.Add("");
+            
+            // DMARC Results
+            lstResults.Items.Add("=== DMARC (Domain-based Message Authentication) ===");
+            lstResults.Items.Add($"Record Exists: {result.DMARC.RecordExists}");
+            if (result.DMARC.RecordExists)
+            {
+                lstResults.Items.Add($"Record: {result.DMARC.Record}");
+                lstResults.Items.Add($"Valid: {result.DMARC.IsValid}");
+                lstResults.Items.Add($"Policy: {result.DMARC.Policy}");
+                lstResults.Items.Add($"Percentage: {result.DMARC.Percentage}%");
+                if (!string.IsNullOrEmpty(result.DMARC.RUA))
+                    lstResults.Items.Add($"Aggregate Reports: {result.DMARC.RUA}");
+                if (!string.IsNullOrEmpty(result.DMARC.RUF))
+                    lstResults.Items.Add($"Forensic Reports: {result.DMARC.RUF}");
+            }
+            else
+            {
+                lstResults.Items.Add("No DMARC record found");
+            }
+            lstResults.Items.Add("");
+            
+            // Warnings and Errors
+            var allWarnings = result.SPF.Warnings.Concat(result.DMARC.Warnings)
+                .Concat(result.DKIM.SelectMany(d => d.Warnings)).ToList();
+            var allErrors = result.SPF.Errors.Concat(result.DMARC.Errors)
+                .Concat(result.DKIM.SelectMany(d => d.Errors)).ToList();
+            
+            if (allWarnings.Any())
+            {
+                lstResults.Items.Add("=== Warnings ===");
+                foreach (var warning in allWarnings)
+                {
+                    lstResults.Items.Add($"⚠️ {warning}");
+                }
+                lstResults.Items.Add("");
+            }
+            
+            if (allErrors.Any())
+            {
+                lstResults.Items.Add("=== Errors ===");
+                foreach (var error in allErrors)
+                {
+                    lstResults.Items.Add($"❌ {error}");
+                }
+            }
         }
     }
 }

@@ -34,6 +34,7 @@
             this.btnScan = new Button();
             this.btnScanLocalhost = new Button();
             this.btnScanCommon = new Button();
+            this.btnEmailAuth = new Button();
             this.btnStop = new Button();
             this.progressBar = new ProgressBar();
             this.lblStatus = new Label();
@@ -121,13 +122,23 @@
             this.btnScanCommon.UseVisualStyleBackColor = true;
             this.btnScanCommon.Click += new EventHandler(this.btnScanCommon_Click);
             // 
+            // btnEmailAuth
+            // 
+            this.btnEmailAuth.Location = new Point(305, 85);
+            this.btnEmailAuth.Name = "btnEmailAuth";
+            this.btnEmailAuth.Size = new Size(100, 30);
+            this.btnEmailAuth.TabIndex = 8;
+            this.btnEmailAuth.Text = "Email Auth";
+            this.btnEmailAuth.UseVisualStyleBackColor = true;
+            this.btnEmailAuth.Click += new EventHandler(this.btnEmailAuth_Click);
+            // 
             // btnStop
             // 
             this.btnStop.Enabled = false;
-            this.btnStop.Location = new Point(305, 85);
+            this.btnStop.Location = new Point(411, 85);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new Size(75, 30);
-            this.btnStop.TabIndex = 8;
+            this.btnStop.TabIndex = 9;
             this.btnStop.Text = "Stop Scan";
             this.btnStop.UseVisualStyleBackColor = true;
             this.btnStop.Click += new EventHandler(this.btnStop_Click);
@@ -198,6 +209,7 @@
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnStop);
+            this.Controls.Add(this.btnEmailAuth);
             this.Controls.Add(this.btnScanCommon);
             this.Controls.Add(this.btnScanLocalhost);
             this.Controls.Add(this.btnScan);
@@ -220,6 +232,7 @@
         private Button btnScan;
         private Button btnScanLocalhost;
         private Button btnScanCommon;
+        private Button btnEmailAuth;
         private Button btnStop;
         private ProgressBar progressBar;
         private Label lblStatus;
