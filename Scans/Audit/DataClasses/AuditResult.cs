@@ -20,6 +20,7 @@ namespace Scans.Audit.DataClasses
         public SecurityCategory PasswordSecurity { get; set; } = new SecurityCategory("Password Security");
         public SecurityCategory SystemSecurity { get; set; } = new SecurityCategory("System Security");
         public SecurityCategory VulnerabilityManagement { get; set; } = new SecurityCategory("Vulnerability Management");
+        public SecurityCategory WebSecurity { get; set; } = new SecurityCategory("Web Security");
         public SecurityCategory Compliance { get; set; } = new SecurityCategory("Compliance");
     }
 
@@ -30,6 +31,7 @@ namespace Scans.Audit.DataClasses
         public ComplianceLevel Level { get; set; } = ComplianceLevel.Red;
         public List<AuditItem> Items { get; set; } = new List<AuditItem>();
         public List<string> Recommendations { get; set; } = new List<string>();
+        public List<string> Errors { get; set; } = new List<string>();
 
         public SecurityCategory(string name)
         {

@@ -211,6 +211,7 @@ namespace Gigahack_Admin123
             DisplaySecurityCategory(result.SystemSecurity);
             DisplaySecurityCategory(result.VulnerabilityManagement);
             DisplaySecurityCategory(result.PasswordSecurity);
+            DisplaySecurityCategory(result.WebSecurity);
 
             // Overall Recommendations
             if (result.Recommendations.Any())

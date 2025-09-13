@@ -18,6 +18,7 @@ namespace Scans.Audit.AuditLogic
         private readonly EmailAuthScanner emailAuthScanner;
         private readonly CVEScanner cveScanner;
         private readonly PasswordChangeScan passwordPolicyScanner;
+        private readonly WebServerTLSPolicyScan webServerScanner;
 
         public AuditScanner()
         {
@@ -25,6 +26,7 @@ namespace Scans.Audit.AuditLogic
             emailAuthScanner = new EmailAuthScanner();
             cveScanner = new CVEScanner();
             passwordPolicyScanner = new PasswordChangeScan();
+            webServerScanner = new WebServerTLSPolicyScan();
         }
 
         public async Task<AuditResult> PerformMiniAudit(string targetIP)
@@ -43,7 +45,8 @@ namespace Scans.Audit.AuditLogic
                     Task.Run(() => PerformPortScanAudit(result, targetIP)),
                     Task.Run(() => PerformEmailAuthAudit(result, targetIP)),
                     Task.Run(async () => await PerformCVEAudit(result, targetIP)),
-                    Task.Run(async () => await PerformPasswordPolicyAudit(result, targetIP))
+                    Task.Run(async () => await PerformPasswordPolicyAudit(result, targetIP)),
+                    Task.Run(() => PerformWebServerAudit(result, targetIP))
                 };
 
                 await Task.WhenAll(tasks);
@@ -386,9 +389,21 @@ namespace Scans.Audit.AuditLogic
 
         private void CalculateOverallCompliance(AuditResult result)
         {
-            var categories = new[] { result.NetworkSecurity, result.SystemSecurity, result.VulnerabilityManagement, result.PasswordSecurity };
-            var totalScore = categories.Sum(cat => cat.Score);
-            result.OverallScore = totalScore / categories.Length;
+            var categories = new[] { result.NetworkSecurity, result.SystemSecurity, result.VulnerabilityManagement, result.PasswordSecurity, result.WebSecurity };
+            
+            // Only include categories that have been scored (exclude Web Security if no web server detected)
+            var scoredCategories = categories.Where(cat => cat.Score > 0 || cat.Name != "Web Security").ToArray();
+            
+            if (scoredCategories.Any())
+            {
+                var totalScore = scoredCategories.Sum(cat => cat.Score);
+                result.OverallScore = totalScore / scoredCategories.Length;
+            }
+            else
+            {
+                result.OverallScore = 0;
+            }
+            
             result.OverallCompliance = GetComplianceLevel(result.OverallScore);
         }
 
@@ -440,6 +455,233 @@ namespace Scans.Audit.AuditLogic
             else
             {
                 result.Recommendations.Add("✅ Overall: Good security posture - maintain current practices");
+            }
+        }
+
+        private void PerformWebServerAudit(AuditResult result, string targetIP)
+        {
+            try
+            {
+                // Check if web ports (80, 443) are open
+                var webPorts = new[] { 80, 443 };
+                var openWebPorts = new List<int>();
+                
+                foreach (var port in webPorts)
+                {
+                    var portResult = portScanner.ScanPort(targetIP, port);
+                    if (portResult.open)
+                    {
+                        openWebPorts.Add(port);
+                    }
+                }
+
+                if (!openWebPorts.Any())
+                {
+                    // No web ports open - not a web server
+                    result.WebSecurity.Items.Add(new AuditItem
+                    {
+                        Name = "Web Server Detection",
+                        Description = "Check if target is running a web server",
+                        Passed = false,
+                        Status = "No web server detected",
+                        Details = "Ports 80 (HTTP) and 443 (HTTPS) are closed",
+                        Weight = 0 // Set weight to 0 so it doesn't affect scoring
+                    });
+                    
+                    result.WebSecurity.Recommendations.Add("Target does not appear to be running a web server");
+                    // Don't calculate score for web security when no web server is detected
+                    result.WebSecurity.Score = 100;
+                    result.WebSecurity.Level = ComplianceLevel.Green; // Neutral level when not applicable
+                    return;
+                }
+
+                // Web server detected - perform comprehensive scan
+                result.WebSecurity.Items.Add(new AuditItem
+                {
+                    Name = "Web Server Detection",
+                    Description = "Check if target is running a web server",
+                    Passed = true,
+                    Status = "Web server detected",
+                    Details = $"Open web ports: {string.Join(", ", openWebPorts)}",
+                    Weight = 1
+                });
+
+                // Scan each open web port
+                foreach (var port in openWebPorts)
+                {
+                    try
+                    {
+                        var webResult = WebServerTLSPolicyScan.ScanWebServer(targetIP, port);
+                        
+                        // TLS/SSL Analysis
+                        result.WebSecurity.Items.Add(new AuditItem
+                        {
+                            Name = $"TLS/SSL Analysis (Port {port})",
+                            Description = "Analyze TLS/SSL configuration and security",
+                            Passed = webResult.Tls12 || webResult.Tls13, // Good if TLS 1.2 or 1.3 supported
+                            Status = GetTLSStatus(webResult),
+                            Details = GetTLSDetails(webResult),
+                            Weight = 3
+                        });
+
+                        // Certificate Analysis
+                        result.WebSecurity.Items.Add(new AuditItem
+                        {
+                            Name = $"Certificate Analysis (Port {port})",
+                            Description = "Analyze SSL/TLS certificate security",
+                            Passed = IsCertificateValid(webResult),
+                            Status = GetCertificateStatus(webResult),
+                            Details = GetCertificateDetails(webResult),
+                            Weight = 3
+                        });
+
+                        // Security Headers Analysis
+                        result.WebSecurity.Items.Add(new AuditItem
+                        {
+                            Name = $"Security Headers (Port {port})",
+                            Description = "Check for important security headers",
+                            Passed = HasSecurityHeaders(webResult),
+                            Status = GetSecurityHeadersStatus(webResult),
+                            Details = GetSecurityHeadersDetails(webResult),
+                            Weight = 2
+                        });
+
+                        // Add recommendations based on findings
+                        AddWebSecurityRecommendations(result.WebSecurity, webResult);
+                    }
+                    catch (Exception ex)
+                    {
+                        result.WebSecurity.Items.Add(new AuditItem
+                        {
+                            Name = $"Web Server Scan (Port {port})",
+                            Description = "Scan web server security configuration",
+                            Passed = false,
+                            Status = "Scan failed",
+                            Details = $"Error: {ex.Message}",
+                            Weight = 1
+                        });
+                    }
+                }
+
+                CalculateCategoryScore(result.WebSecurity);
+            }
+            catch (Exception ex)
+            {
+                result.WebSecurity.Errors.Add($"Web server audit failed: {ex.Message}");
+                result.WebSecurity.Level = ComplianceLevel.Red;
+            }
+        }
+
+        private string GetTLSStatus(WebServerScanResult webResult)
+        {
+            if (webResult.Tls13) return "TLS 1.3 supported (Excellent)";
+            if (webResult.Tls12) return "TLS 1.2 supported (Good)";
+            if (webResult.Tls11) return "TLS 1.1 supported (Weak)";
+            if (webResult.Tls10) return "TLS 1.0 supported (Very Weak)";
+            return "No TLS support detected";
+        }
+
+        private string GetTLSDetails(WebServerScanResult webResult)
+        {
+            var details = new List<string>();
+            if (webResult.Tls10) details.Add("TLS 1.0: Supported");
+            if (webResult.Tls11) details.Add("TLS 1.1: Supported");
+            if (webResult.Tls12) details.Add("TLS 1.2: Supported");
+            if (webResult.Tls13) details.Add("TLS 1.3: Supported");
+            return string.Join(" | ", details);
+        }
+
+        private bool IsCertificateValid(WebServerScanResult webResult)
+        {
+            if (webResult.CertificateValidTo == DateTime.MinValue) return false;
+            return webResult.CertificateValidTo > DateTime.Now;
+        }
+
+        private string GetCertificateStatus(WebServerScanResult webResult)
+        {
+            if (webResult.CertificateValidTo == DateTime.MinValue) return "No certificate found";
+            if (webResult.CertificateValidTo <= DateTime.Now) return "Certificate expired";
+            if (webResult.CertificateValidTo <= DateTime.Now.AddDays(30)) return "Certificate expires soon";
+            return "Certificate valid";
+        }
+
+        private string GetCertificateDetails(WebServerScanResult webResult)
+        {
+            if (webResult.CertificateValidTo == DateTime.MinValue) return "No certificate information available";
+            
+            var daysUntilExpiry = (webResult.CertificateValidTo - DateTime.Now).Days;
+            return $"Issuer: {webResult.CertificateIssuer} | Expires: {webResult.CertificateValidTo:yyyy-MM-dd} ({daysUntilExpiry} days)";
+        }
+
+        private bool HasSecurityHeaders(WebServerScanResult webResult)
+        {
+            return !string.IsNullOrEmpty(webResult.HSTS) || 
+                   !string.IsNullOrEmpty(webResult.ContentSecurityPolicy) ||
+                   !string.IsNullOrEmpty(webResult.XFrameOptions);
+        }
+
+        private string GetSecurityHeadersStatus(WebServerScanResult webResult)
+        {
+            var headers = new List<string>();
+            if (!string.IsNullOrEmpty(webResult.HSTS)) headers.Add("HSTS");
+            if (!string.IsNullOrEmpty(webResult.ContentSecurityPolicy)) headers.Add("CSP");
+            if (!string.IsNullOrEmpty(webResult.XFrameOptions)) headers.Add("X-Frame-Options");
+            if (!string.IsNullOrEmpty(webResult.XContentTypeOptions)) headers.Add("X-Content-Type-Options");
+            if (!string.IsNullOrEmpty(webResult.ReferrerPolicy)) headers.Add("Referrer-Policy");
+            
+            return headers.Any() ? $"Security headers found: {string.Join(", ", headers)}" : "No security headers detected";
+        }
+
+        private string GetSecurityHeadersDetails(WebServerScanResult webResult)
+        {
+            var details = new List<string>();
+            if (!string.IsNullOrEmpty(webResult.HSTS)) details.Add($"HSTS: {webResult.HSTS}");
+            if (!string.IsNullOrEmpty(webResult.ContentSecurityPolicy)) details.Add($"CSP: {webResult.ContentSecurityPolicy}");
+            if (!string.IsNullOrEmpty(webResult.XFrameOptions)) details.Add($"X-Frame-Options: {webResult.XFrameOptions}");
+            if (!string.IsNullOrEmpty(webResult.XContentTypeOptions)) details.Add($"X-Content-Type-Options: {webResult.XContentTypeOptions}");
+            if (!string.IsNullOrEmpty(webResult.ReferrerPolicy)) details.Add($"Referrer-Policy: {webResult.ReferrerPolicy}");
+            
+            return details.Any() ? string.Join(" | ", details) : "No security headers configured";
+        }
+
+        private void AddWebSecurityRecommendations(SecurityCategory webSecurity, WebServerScanResult webResult)
+        {
+            // TLS Recommendations
+            if (!webResult.Tls12 && !webResult.Tls13)
+            {
+                webSecurity.Recommendations.Add("Enable TLS 1.2 or higher for secure communication");
+            }
+            if (webResult.Tls10 || webResult.Tls11)
+            {
+                webSecurity.Recommendations.Add("Disable TLS 1.0 and 1.1 as they are deprecated and insecure");
+            }
+
+            // Certificate Recommendations
+            if (webResult.CertificateValidTo != DateTime.MinValue)
+            {
+                var daysUntilExpiry = (webResult.CertificateValidTo - DateTime.Now).Days;
+                if (daysUntilExpiry <= 30)
+                {
+                    webSecurity.Recommendations.Add("Certificate expires soon - renew immediately");
+                }
+                else if (daysUntilExpiry <= 90)
+                {
+                    webSecurity.Recommendations.Add("Certificate expires in 90 days - plan renewal");
+                }
+            }
+
+            // Security Headers Recommendations
+            if (string.IsNullOrEmpty(webResult.HSTS))
+            {
+                webSecurity.Recommendations.Add("Implement HSTS (HTTP Strict Transport Security) header");
+            }
+            if (string.IsNullOrEmpty(webResult.ContentSecurityPolicy))
+            {
+                webSecurity.Recommendations.Add("Implement Content Security Policy (CSP) header");
+            }
+            if (string.IsNullOrEmpty(webResult.XFrameOptions))
+            {
+                webSecurity.Recommendations.Add("Implement X-Frame-Options header to prevent clickjacking");
             }
         }
 
