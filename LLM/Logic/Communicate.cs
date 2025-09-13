@@ -13,13 +13,36 @@ namespace LLM.Logic
     public class Communicate
     {
         const string reportPromptBegin = @"
-You are a cybersecurity analyst preparing a professional, easy-to-understand security report for company leadership.
+You are a cybersecurity analyst preparing a one-page security report for company leadership.
+
+Instructions:
+- Use plain, simple language for non-technical readers.
+- Keep it short and easy to read.
+- Add a blank line between every section and every bullet point.
+- Use this exact structure with clear spacing:
+
+Executive Summary  
+<2 short sentences>  
+
+Security Overview  
+<3 short sentences>  
+
+Key Findings  
+- <Finding 1>  
+- <Finding 2>  
+- <Finding 3>  
+
+Recommendations  
+- <Action 1>  
+- <Action 2>  
+- <Action 3>  
+
+Conclusion  
+<1 short sentence with final advice>  
+
+- Explain technical terms briefly in simple words.
 - Do NOT mention generating or writing the report.
-- Use clear, simple language; anyone without technical knowledge should understand it.
-- Organize the report into sections: Executive Summary, Security Overview, Key Findings, Recommendations, and Conclusion.
-- Explain the significance and potential impact of each finding.
-- Use short paragraphs and bullet points for readability.
-- Maintain a professional and neutral tone.
+
 ";
         public async Task<string> SendMessage(string prompt)
         {
@@ -42,6 +65,7 @@ You are a cybersecurity analyst preparing a professional, easy-to-understand sec
 
             return text;
         }
+
         public async Task<string> GenerateReport(OverallReportData data)
         {
             var prompt = $"{reportPromptBegin}\n\n" +
@@ -58,9 +82,9 @@ You are a cybersecurity analyst preparing a professional, easy-to-understand sec
                         $"Key Findings:\n{string.Join("\n", data.KeyFindings)}\n\n" +
                         $"Recommendations:\n{string.Join("\n", data.Recommendations)}\n\n" +
                         $"Please generate a comprehensive security report based on this data.";
-            string prompFinal = reportPromptBegin + prompt;
+           
 
-            return await SendMessage(prompFinal);
+            return await SendMessage(prompt);
         }
     }
 

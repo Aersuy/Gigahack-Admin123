@@ -548,11 +548,20 @@ namespace Gigahack_Admin123
             try
             {
                 var quizForm = new QuizForm();
-                quizForm.ShowDialog();
+                var result = quizForm.ShowDialog();
+                
+                // Store the assessment result for potential report generation
+                if (quizForm.CompletedAssessment != null)
+                {
+                    // Store the assessment for later use in reports
+                    // This could be added to the audit result or used separately
+                    MessageBox.Show("Assessment completed! Results are now available for report generation.", 
+                                  "Assessment Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error opening quiz: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error opening assessment: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

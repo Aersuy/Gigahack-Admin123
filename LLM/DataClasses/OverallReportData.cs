@@ -29,5 +29,9 @@ namespace LLM.DataClasses
         public List<string> Errors { get; set; } = new List<string>();
         public bool Success { get; set; }
         public string ErrorMessage { get; set; } = string.Empty;
+        
+        // Assessment data for LLM integration
+        public AssessmentResult? Assessment { get; set; }
+        public bool HasAssessmentData => Assessment != null;
     }
 }

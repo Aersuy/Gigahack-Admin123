@@ -648,5 +648,221 @@ namespace LLM.Logic
             
             return new List<QuizSession>();
         }
+
+        public AssessmentResult ConvertToAssessmentResult(QuizResult quizResult, Dictionary<int, string> userAnswers)
+        {
+            var assessmentResult = new AssessmentResult
+            {
+                Target = "Organization Cybersecurity Assessment",
+                ScanTime = quizResult.Session.StartTime,
+                Success = quizResult.Session.IsCompleted,
+                SecurityScore = quizResult.Session.Score,
+                SecurityGrade = quizResult.Grade
+            };
+
+            // Group questions by category
+            var categorizedQuestions = quizResult.Questions
+                .Where(q => userAnswers.ContainsKey(q.Id))
+                .GroupBy(q => q.Category)
+                .ToList();
+
+            foreach (var categoryGroup in categorizedQuestions)
+            {
+                var category = new AssessmentCategory
+                {
+                    Name = categoryGroup.Key,
+                    Items = new List<AssessmentItem>()
+                };
+
+                int categoryScore = 0;
+                int categoryMaxScore = 0;
+
+                foreach (var question in categoryGroup)
+                {
+                    var answer = quizResult.Session.Answers.FirstOrDefault(a => a.QuestionId == question.Id);
+                    var userAnswer = userAnswers.ContainsKey(question.Id) ? userAnswers[question.Id] : "No answer";
+                    
+                    var questionScore = answer != null ? CalculateSecurityScore(question, answer.SelectedAnswerIndex) : 0;
+                    categoryScore += questionScore;
+                    categoryMaxScore += 4; // Max score per question
+
+                    var item = new AssessmentItem
+                    {
+                        Question = question.Question,
+                        Answer = userAnswer,
+                        Status = GetAnswerStatus(questionScore),
+                        Score = questionScore,
+                        Explanation = question.Explanation,
+                        Category = question.Category
+                    };
+
+                    category.Items.Add(item);
+                }
+
+                category.Score = categoryMaxScore > 0 ? (int)((double)categoryScore / categoryMaxScore * 100) : 0;
+                category.Level = GetSecurityLevel(category.Score);
+                category.Recommendations = GenerateCategoryRecommendations(categoryGroup.Key, category.Items);
+
+                assessmentResult.Categories.Add(category);
+            }
+
+            // Generate overall recommendations and summary
+            assessmentResult.Recommendations = GenerateOverallRecommendations(assessmentResult.Categories, userAnswers);
+            assessmentResult.Warnings = GenerateWarnings(assessmentResult.Categories, userAnswers);
+            assessmentResult.Summary = GenerateAssessmentSummary(quizResult, userAnswers, assessmentResult.Categories);
+
+            return assessmentResult;
+        }
+
+        private string GetAnswerStatus(int score)
+        {
+            return score switch
+            {
+                4 => "Excellent",
+                3 => "Good",
+                2 => "Fair", 
+                1 => "Poor",
+                _ => "Critical"
+            };
+        }
+
+        private string GetSecurityLevel(int percentage)
+        {
+            return percentage switch
+            {
+                >= 80 => "High",
+                >= 60 => "Medium",
+                >= 40 => "Low",
+                _ => "Critical"
+            };
+        }
+
+        private List<string> GenerateCategoryRecommendations(string category, List<AssessmentItem> items)
+        {
+            var recommendations = new List<string>();
+            var poorItems = items.Where(i => i.Score <= 2).ToList();
+
+            foreach (var item in poorItems)
+            {
+                switch (category)
+                {
+                    case "Business Profile":
+                        if (item.Question.Contains("critical sector"))
+                            recommendations.Add("Consider implementing enhanced security measures required for critical sectors.");
+                        break;
+                    case "Access Control":
+                        if (item.Question.Contains("Two-Factor"))
+                            recommendations.Add("Implement Multi-Factor Authentication (MFA) for all administrator and privileged accounts immediately.");
+                        break;
+                    case "Web Security":
+                        if (item.Question.Contains("HTTPS"))
+                            recommendations.Add("Ensure all web applications enforce HTTPS with valid TLS certificates.");
+                        if (item.Question.Contains("security headers"))
+                            recommendations.Add("Implement security headers (HSTS, CSP, X-Frame-Options) on all web applications.");
+                        break;
+                    case "Email Security":
+                        if (item.Question.Contains("SPF"))
+                            recommendations.Add("Configure SPF records for your email domain to prevent spoofing.");
+                        if (item.Question.Contains("DKIM"))
+                            recommendations.Add("Implement DKIM signing for email authentication.");
+                        if (item.Question.Contains("DMARC"))
+                            recommendations.Add("Set up DMARC policy with 'quarantine' or 'reject' action.");
+                        break;
+                    case "Backup & Recovery":
+                        if (item.Question.Contains("backup"))
+                            recommendations.Add("Implement regular automated backups with offsite storage.");
+                        if (item.Question.Contains("tested"))
+                            recommendations.Add("Regularly test backup restoration procedures (at least quarterly).");
+                        break;
+                }
+            }
+
+            return recommendations;
+        }
+
+        private List<string> GenerateOverallRecommendations(List<AssessmentCategory> categories, Dictionary<int, string> userAnswers)
+        {
+            var recommendations = new List<string>();
+            var criticalCategories = categories.Where(c => c.Score < 40).ToList();
+            var lowCategories = categories.Where(c => c.Score >= 40 && c.Score < 60).ToList();
+
+            if (criticalCategories.Any())
+            {
+                recommendations.Add("CRITICAL: Immediate action required in the following areas: " + 
+                                  string.Join(", ", criticalCategories.Select(c => c.Name)));
+            }
+
+            if (lowCategories.Any())
+            {
+                recommendations.Add("PRIORITY: Improve security measures in: " + 
+                                  string.Join(", ", lowCategories.Select(c => c.Name)));
+            }
+
+            // Add specific recommendations based on answers
+            if (userAnswers.ContainsKey(8) && userAnswers[8] == "No")
+                recommendations.Add("Enable Two-Factor Authentication (2FA/MFA) for all administrative accounts immediately.");
+
+            if (userAnswers.ContainsKey(10) && userAnswers[10] == "No")
+                recommendations.Add("Establish a regular patch management process for all systems and applications.");
+
+            if (userAnswers.ContainsKey(22) && userAnswers[22] == "No")
+                recommendations.Add("Develop and document a comprehensive incident response plan.");
+
+            return recommendations;
+        }
+
+        private List<string> GenerateWarnings(List<AssessmentCategory> categories, Dictionary<int, string> userAnswers)
+        {
+            var warnings = new List<string>();
+
+            // Check for high-risk scenarios
+            if (userAnswers.ContainsKey(24) && userAnswers[24] == "Yes")
+                warnings.Add("Recent cybersecurity incidents detected - review and strengthen security measures.");
+
+            if (userAnswers.ContainsKey(2) && userAnswers[2] == "Yes")
+                warnings.Add("Critical sector organization - enhanced compliance requirements may apply.");
+
+            if (userAnswers.ContainsKey(3) && userAnswers[3] == "Yes" && 
+                userAnswers.ContainsKey(17) && userAnswers[17] == "No")
+                warnings.Add("Personal data collection without encryption at rest poses GDPR compliance risk.");
+
+            return warnings;
+        }
+
+        private AssessmentSummary GenerateAssessmentSummary(QuizResult quizResult, Dictionary<int, string> userAnswers, List<AssessmentCategory> categories)
+        {
+            var summary = new AssessmentSummary
+            {
+                TotalQuestions = quizResult.Session.TotalQuestions,
+                QuestionsAnswered = userAnswers.Count,
+                CompletionPercentage = quizResult.Session.TotalQuestions > 0 ? 
+                    (double)userAnswers.Count / quizResult.Session.TotalQuestions * 100 : 0
+            };
+
+            // Determine organization type
+            if (userAnswers.ContainsKey(1) && userAnswers[1] == "Yes")
+                summary.OrganizationType = "Small/Medium Enterprise (SME)";
+            else
+                summary.OrganizationType = "Large Enterprise";
+
+            // Identify applicable sectors
+            if (userAnswers.ContainsKey(2) && userAnswers[2] == "Yes")
+                summary.ApplicableSectors.Add("Critical Infrastructure Sector");
+            if (userAnswers.ContainsKey(7) && userAnswers[7] == "Yes")
+                summary.ApplicableSectors.Add("Cloud Services User");
+            if (userAnswers.ContainsKey(3) && userAnswers[3] == "Yes")
+                summary.ApplicableSectors.Add("Personal Data Processor");
+
+            // Generate key findings
+            var excellentCategories = categories.Where(c => c.Score >= 80).Select(c => c.Name).ToList();
+            var criticalCategories = categories.Where(c => c.Score < 40).Select(c => c.Name).ToList();
+
+            if (excellentCategories.Any())
+                summary.KeyFindings.Add("Strong security posture in: " + string.Join(", ", excellentCategories));
+            if (criticalCategories.Any())
+                summary.CriticalIssues.AddRange(criticalCategories.Select(c => $"Critical gaps in {c}"));
+
+            return summary;
+        }
     }
 }

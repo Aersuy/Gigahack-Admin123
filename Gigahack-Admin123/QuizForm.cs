@@ -19,6 +19,7 @@ namespace Gigahack_Admin123
         private int currentQuestionId = 1; // Track by ID instead of index
         private List<QuizQuestion> allQuestions;
         private Dictionary<int, string> userAnswers = new Dictionary<int, string>();
+        public AssessmentResult? CompletedAssessment { get; private set; }
 
         public QuizForm()
         {
@@ -152,6 +153,10 @@ namespace Gigahack_Admin123
         private void FinishQuiz()
         {
             quiz.CompleteQuiz(currentQuizResult);
+            
+            // Convert to assessment result format for LLM integration
+            CompletedAssessment = quiz.ConvertToAssessmentResult(currentQuizResult, userAnswers);
+            
             ShowResults();
         }
 
