@@ -14,6 +14,15 @@ namespace LLM.DataClasses
         public int CorrectAnswerIndex { get; set; }
         public string Category { get; set; } = string.Empty;
         public string Explanation { get; set; } = string.Empty;
+        public int? NextQuestionId { get; set; } = null;
+        public List<QuizCondition> Conditions { get; set; } = new List<QuizCondition>();
+    }
+
+    public class QuizCondition
+    {
+        public int RequiredQuestionId { get; set; }
+        public string RequiredAnswer { get; set; } = string.Empty;
+        public bool IsRequired { get; set; } = true; // true for "all", false for "any"
     }
 
     public class QuizAnswer

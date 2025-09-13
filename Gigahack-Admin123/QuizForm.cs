@@ -16,8 +16,9 @@ namespace Gigahack_Admin123
     {
         private Quiz quiz;
         private QuizResult currentQuizResult;
-        private int currentQuestionIndex = 0;
-        private List<QuizQuestion> questions;
+        private int currentQuestionId = 1; // Track by ID instead of index
+        private List<QuizQuestion> allQuestions;
+        private Dictionary<int, string> userAnswers = new Dictionary<int, string>();
 
         public QuizForm()
         {
@@ -28,24 +29,27 @@ namespace Gigahack_Admin123
 
         private void StartNewAssessment()
         {
-            // Get 8 random questions for assessment
-            questions = quiz.GetRandomQuestions(8);
-            currentQuizResult = quiz.CreateQuizSession(questions);
-            currentQuestionIndex = 0;
-
+            // Get all questions for conditional assessment
+            allQuestions = quiz.GetConditionalQuestions();
+            currentQuizResult = quiz.CreateQuizSession(allQuestions);
+            currentQuestionId = 1;
+            userAnswers.Clear();
+            
             DisplayCurrentQuestion();
         }
 
         private void DisplayCurrentQuestion()
         {
-            if (currentQuestionIndex < questions.Count)
+            var question = allQuestions.FirstOrDefault(q => q.Id == currentQuestionId);
+            if (question != null)
             {
-                var question = questions[currentQuestionIndex];
-
-                lblQuestionNumber.Text = $"Question {currentQuestionIndex + 1} of {questions.Count}";
+                // Calculate question number for display
+                var questionNumber = userAnswers.Count + 1;
+                
+                lblQuestionNumber.Text = $"Question {questionNumber}";
                 lblQuestion.Text = question.Question;
                 lblCategory.Text = $"Category: {question.Category}";
-
+                
                 // Clear previous options
                 foreach (Control control in panelOptions.Controls)
                 {
@@ -55,7 +59,7 @@ namespace Gigahack_Admin123
                     }
                 }
                 panelOptions.Controls.Clear();
-
+                
                 // Add new options
                 for (int i = 0; i < question.Options.Count; i++)
                 {
@@ -71,10 +75,12 @@ namespace Gigahack_Admin123
                     };
                     panelOptions.Controls.Add(radioButton);
                 }
-
-                btnNext.Text = currentQuestionIndex == questions.Count - 1 ? "Complete Assessment" : "Next Question";
+                
+                // Determine if this is the last question
+                var nextQuestionId = quiz.GetNextQuestionId(currentQuestionId, userAnswers);
+                btnNext.Text = nextQuestionId == -1 ? "Complete Assessment" : "Next Question";
                 btnNext.Enabled = false; // Enable when an option is selected
-
+                
                 // Add event handlers
                 foreach (Control control in panelOptions.Controls)
                 {
@@ -83,6 +89,11 @@ namespace Gigahack_Admin123
                         rb.CheckedChanged += RadioButton_CheckedChanged;
                     }
                 }
+            }
+            else
+            {
+                // No more questions, finish assessment
+                FinishQuiz();
             }
         }
 
@@ -98,14 +109,39 @@ namespace Gigahack_Admin123
             if (selectedRadioButton != null)
             {
                 int selectedAnswerIndex = (int)selectedRadioButton.Tag;
-                quiz.SubmitAnswer(currentQuizResult, questions[currentQuestionIndex].Id, selectedAnswerIndex);
+                var currentQuestion = allQuestions.FirstOrDefault(q => q.Id == currentQuestionId);
+                
+                if (currentQuestion != null)
+                {
+                    // Store the answer text for conditional logic
+                    string selectedAnswerText = currentQuestion.Options[selectedAnswerIndex];
+                    userAnswers[currentQuestionId] = selectedAnswerText;
+                    
+                    // Submit answer to quiz result
+                    quiz.SubmitAnswer(currentQuizResult, currentQuestionId, selectedAnswerIndex);
+                }
             }
 
-            currentQuestionIndex++;
-
-            if (currentQuestionIndex < questions.Count)
+            // Get next question ID based on conditional logic
+            var nextQuestionId = quiz.GetNextQuestionId(currentQuestionId, userAnswers);
+            
+            if (nextQuestionId > 0)
             {
-                DisplayCurrentQuestion();
+                // Skip questions that shouldn't be shown based on conditions
+                while (nextQuestionId > 0 && !quiz.ShouldShowQuestion(nextQuestionId, userAnswers))
+                {
+                    nextQuestionId = quiz.GetNextQuestionId(nextQuestionId, userAnswers);
+                }
+                
+                if (nextQuestionId > 0)
+                {
+                    currentQuestionId = nextQuestionId;
+                    DisplayCurrentQuestion();
+                }
+                else
+                {
+                    FinishQuiz();
+                }
             }
             else
             {
@@ -121,7 +157,9 @@ namespace Gigahack_Admin123
 
         private void ShowResults()
         {
-            var resultsForm = new QuizResultsForm(currentQuizResult, questions);
+            // Create a list of questions that were actually answered
+            var answeredQuestions = allQuestions.Where(q => userAnswers.ContainsKey(q.Id)).ToList();
+            var resultsForm = new QuizResultsForm(currentQuizResult, answeredQuestions);
             resultsForm.ShowDialog();
             this.Close();
         }

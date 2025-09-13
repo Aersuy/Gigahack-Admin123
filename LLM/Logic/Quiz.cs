@@ -19,121 +19,526 @@ namespace LLM.Logic
         {
             questions = new List<QuizQuestion>
             {
+                // Basic Business Profile Questions
                 new QuizQuestion
                 {
                     Id = 1,
-                    Question = "How many employees work in your organization?",
-                    Options = new List<string> { "1-10 employees", "11-50 employees", "51-200 employees", "200+ employees" },
-                    CorrectAnswerIndex = -1, // No correct answer for assessment
-                    Category = "Organization Size",
-                    Explanation = "This helps determine the scale of your IT infrastructure needs and security requirements."
+                    Question = "Are you a small or medium enterprise (SME)?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Business Profile",
+                    Explanation = "SME classification affects compliance requirements and available resources for cybersecurity measures."
                 },
                 new QuizQuestion
                 {
                     Id = 2,
-                    Question = "What type of network infrastructure does your organization primarily use?",
-                    Options = new List<string> { "On-premises servers and local network", "Cloud-based infrastructure (AWS, Azure, Google Cloud)", "Hybrid (mix of on-premises and cloud)", "Mostly remote/distributed workforce" },
+                    Question = "Do you operate in a nationally defined critical sector (e.g., telecom, banking, healthcare, transport, cloud/data center/hosting)?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Network Infrastructure",
-                    Explanation = "Understanding your network setup helps identify potential security vulnerabilities and infrastructure gaps."
+                    Category = "Business Profile",
+                    Explanation = "Critical sectors have enhanced cybersecurity requirements and stricter compliance obligations."
                 },
                 new QuizQuestion
                 {
                     Id = 3,
-                    Question = "How often do you perform security updates and patches?",
-                    Options = new List<string> { "Automatically as they're released", "Monthly scheduled updates", "Quarterly or less frequent", "Only when critical issues arise" },
+                    Question = "Do you collect or store personal data (customers or employees)?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Patch Management",
-                    Explanation = "Regular patching is crucial for maintaining security and preventing exploitation of known vulnerabilities."
+                    Category = "Data Handling",
+                    Explanation = "Personal data collection triggers GDPR and other privacy regulation compliance requirements."
                 },
                 new QuizQuestion
                 {
                     Id = 4,
-                    Question = "What backup strategy does your organization use?",
-                    Options = new List<string> { "Daily automated backups with offsite storage", "Weekly backups to local storage", "Monthly or irregular backups", "No formal backup strategy" },
+                    Question = "Do you have a website or online application that is important for your business?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Data Backup",
-                    Explanation = "Proper backup strategies are essential for business continuity and disaster recovery."
+                    Category = "Digital Assets",
+                    Explanation = "Web applications are common attack vectors and require specific security measures."
                 },
                 new QuizQuestion
                 {
                     Id = 5,
-                    Question = "How do employees access company systems remotely?",
-                    Options = new List<string> { "VPN with multi-factor authentication", "VPN with password only", "Direct internet access to systems", "No remote access capabilities" },
+                    Question = "Do you keep business or customer data in a database (including cloud databases or business systems)?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Remote Access",
-                    Explanation = "Secure remote access is critical for protecting company resources and data."
+                    Category = "Data Storage",
+                    Explanation = "Database security is critical for protecting sensitive business and customer information."
                 },
                 new QuizQuestion
                 {
                     Id = 6,
-                    Question = "What antivirus/endpoint protection solution do you use?",
-                    Options = new List<string> { "Enterprise endpoint detection and response (EDR)", "Traditional antivirus software", "Built-in Windows/Mac protection only", "No antivirus protection" },
+                    Question = "Do you use your own business email domain (e.g., name@yourcompany.md)?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Endpoint Security",
-                    Explanation = "Modern endpoint protection is essential for detecting and preventing malware and advanced threats."
+                    Category = "Communication",
+                    Explanation = "Business email domains require specific security configurations like SPF, DKIM, and DMARC."
                 },
                 new QuizQuestion
                 {
                     Id = 7,
-                    Question = "How is sensitive data (customer info, financial data) protected?",
-                    Options = new List<string> { "Encrypted at rest and in transit with access controls", "Basic password protection", "Stored on shared drives with limited access", "No special protection measures" },
+                    Question = "Do you use cloud services (e.g., Microsoft 365, Google Workspace, AWS, Azure)?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Data Protection",
-                    Explanation = "Proper data protection is crucial for compliance and preventing data breaches."
+                    Category = "Cloud Services",
+                    Explanation = "Cloud services require specific security configurations and monitoring practices."
                 },
+                
+                // Security Measures Questions
                 new QuizQuestion
                 {
                     Id = 8,
-                    Question = "What email security measures are in place?",
-                    Options = new List<string> { "Advanced email security with spam/phishing protection", "Basic spam filtering", "Standard email client protection", "No additional email security" },
+                    Question = "Is Two-Factor Authentication (2FA/MFA) enabled for administrator or privileged accounts?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Email Security",
-                    Explanation = "Email is a common attack vector and requires robust security measures."
+                    Category = "Access Control",
+                    Explanation = "2FA/MFA significantly reduces the risk of account compromise and unauthorized access."
                 },
                 new QuizQuestion
                 {
                     Id = 9,
-                    Question = "How often do you conduct security awareness training?",
-                    Options = new List<string> { "Quarterly with phishing simulations", "Annual training sessions", "Informal training as needed", "No formal security training" },
+                    Question = "Do you keep an inventory of internet-exposed assets (domains, websites, servers, open ports)?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Security Training",
-                    Explanation = "Regular security training helps employees recognize and avoid security threats."
+                    Category = "Asset Management",
+                    Explanation = "Asset inventory is essential for understanding your attack surface and managing security risks."
                 },
                 new QuizQuestion
                 {
                     Id = 10,
-                    Question = "Do you have an incident response plan for security breaches?",
-                    Options = new List<string> { "Documented plan with regular testing", "Basic plan but not regularly updated", "Informal response procedures", "No incident response plan" },
+                    Question = "Do you regularly apply security updates/patches to systems and applications?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Incident Response",
-                    Explanation = "Having a proper incident response plan is crucial for minimizing damage from security incidents."
+                    Category = "Patch Management",
+                    Explanation = "Regular patching is critical for closing security vulnerabilities and preventing exploits."
                 },
                 new QuizQuestion
                 {
                     Id = 11,
-                    Question = "What type of firewall protection do you have?",
-                    Options = new List<string> { "Next-generation firewall with intrusion detection", "Traditional firewall", "Router-based firewall only", "No dedicated firewall" },
+                    Question = "Do you centralize security logs (e.g., sign-ins, errors) so you can investigate incidents?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Network Security",
-                    Explanation = "Proper firewall protection is the first line of defense against network threats."
+                    Category = "Logging & Monitoring",
+                    Explanation = "Centralized logging enables effective incident response and security monitoring."
                 },
+                
+                // Website Security (Conditional)
                 new QuizQuestion
                 {
                     Id = 12,
-                    Question = "How do you manage user access and permissions?",
-                    Options = new List<string> { "Role-based access control with regular reviews", "Basic user groups and permissions", "Individual permission assignments", "All users have similar access levels" },
+                    Question = "Does your website/app enforce HTTPS (TLS) with a valid certificate?",
+                    Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
-                    Category = "Access Control",
-                    Explanation = "Proper access control ensures users only have access to resources they need for their job."
+                    Category = "Web Security",
+                    Explanation = "HTTPS encryption protects data in transit and is essential for web application security."
+                },
+                new QuizQuestion
+                {
+                    Id = 13,
+                    Question = "Does your website/app use basic security headers (e.g., HSTS, CSP, X-Frame-Options)?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Web Security",
+                    Explanation = "Security headers provide additional protection against common web attacks."
+                },
+                new QuizQuestion
+                {
+                    Id = 14,
+                    Question = "Have you checked TLS configuration and removed weak settings within the last 12 months?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Web Security",
+                    Explanation = "Regular TLS configuration reviews ensure strong encryption and remove deprecated protocols."
+                },
+                
+                // Backup & Database Security (Conditional)
+                new QuizQuestion
+                {
+                    Id = 15,
+                    Question = "Do you make regular backups of important systems/data?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Backup & Recovery",
+                    Explanation = "Regular backups are essential for business continuity and ransomware recovery."
+                },
+                new QuizQuestion
+                {
+                    Id = 16,
+                    Question = "Have you successfully TESTED a backup restore within the last 3 months?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Backup & Recovery",
+                    Explanation = "Testing backups ensures they work when needed and validates recovery procedures."
+                },
+                new QuizQuestion
+                {
+                    Id = 17,
+                    Question = "Is data at rest encrypted in your databases/storage that hold personal or sensitive data?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Data Protection",
+                    Explanation = "Encryption at rest protects sensitive data from unauthorized access even if storage is compromised."
+                },
+                new QuizQuestion
+                {
+                    Id = 18,
+                    Question = "Do you review user accounts regularly (remove ex-staff, rotate passwords/keys, least privilege)?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Access Management",
+                    Explanation = "Regular account reviews prevent unauthorized access and enforce least privilege principles."
+                },
+                
+                // Email Security (Conditional)
+                new QuizQuestion
+                {
+                    Id = 19,
+                    Question = "Do you have SPF configured for your email domain?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Email Security",
+                    Explanation = "SPF prevents email spoofing by specifying which servers can send email for your domain."
+                },
+                new QuizQuestion
+                {
+                    Id = 20,
+                    Question = "Do you have DKIM configured for your email domain?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Email Security",
+                    Explanation = "DKIM provides email authentication through digital signatures to prevent tampering."
+                },
+                new QuizQuestion
+                {
+                    Id = 21,
+                    Question = "Do you have a DMARC policy set to at least 'quarantine' or 'reject'?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Email Security",
+                    Explanation = "DMARC policies enforce SPF and DKIM to prevent email spoofing and phishing attacks."
+                },
+                
+                // Incident Response
+                new QuizQuestion
+                {
+                    Id = 22,
+                    Question = "Do you have a written incident response plan (who does what, steps, and notifications)?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Incident Response",
+                    Explanation = "A written incident response plan ensures organized and effective response to security incidents."
+                },
+                new QuizQuestion
+                {
+                    Id = 23,
+                    Question = "Have you had any internal or external security check/audit in the last 3 years?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Security Assessment",
+                    Explanation = "Regular security audits help identify vulnerabilities and validate security controls."
+                },
+                
+                // Incident History
+                new QuizQuestion
+                {
+                    Id = 24,
+                    Question = "Have you had any cybersecurity incidents in the last 12 months?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Incident History",
+                    Explanation = "Recent incidents indicate potential security gaps that need to be addressed."
+                },
+                new QuizQuestion
+                {
+                    Id = 25,
+                    Question = "In the last 6 months, did you have two or more incidents with the same root cause?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Incident Analysis",
+                    Explanation = "Repeated incidents with the same root cause indicate systemic security issues."
+                },
+                new QuizQuestion
+                {
+                    Id = 26,
+                    Question = "Did the direct financial loss from incidents reach or exceed 5% of last year's total revenue?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Impact Assessment",
+                    Explanation = "Significant financial impact from incidents may trigger additional reporting requirements."
+                },
+                
+                // Reporting Capabilities
+                new QuizQuestion
+                {
+                    Id = 27,
+                    Question = "Are you prepared to submit three-stage reports to the Cybersecurity Agency (Initial, Update, Final)?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Compliance Reporting",
+                    Explanation = "Multi-stage incident reporting is required for regulatory compliance in many jurisdictions."
+                },
+                new QuizQuestion
+                {
+                    Id = 28,
+                    Question = "Can you export incident reports as PDF?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Reporting Capabilities",
+                    Explanation = "PDF export capabilities facilitate incident documentation and regulatory reporting."
+                },
+                new QuizQuestion
+                {
+                    Id = 29,
+                    Question = "Can you export incident reports as JSON?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Reporting Capabilities",
+                    Explanation = "JSON export enables automated processing and integration with other systems."
+                },
+                new QuizQuestion
+                {
+                    Id = 30,
+                    Question = "Can you submit incident reports via an API (automatic submission)?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Automated Reporting",
+                    Explanation = "API submission enables automated and timely incident reporting to authorities."
+                },
+                new QuizQuestion
+                {
+                    Id = 31,
+                    Question = "Can you submit incident reports by manual upload?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Manual Reporting",
+                    Explanation = "Manual upload capabilities provide backup reporting methods when automation fails."
+                },
+                new QuizQuestion
+                {
+                    Id = 32,
+                    Question = "Do you have a person responsible for incident reporting (owner/manager/IT)?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Governance",
+                    Explanation = "Designated incident reporting responsibility ensures accountability and timely reporting."
+                },
+                
+                // Advanced Requirements
+                new QuizQuestion
+                {
+                    Id = 33,
+                    Question = "If you are in a critical sector, can you provide automated/direct access for the Agency to incident notifications when required?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Critical Sector Compliance",
+                    Explanation = "Critical sectors may require direct agency access for incident monitoring and response."
+                },
+                new QuizQuestion
+                {
+                    Id = 34,
+                    Question = "If you use cloud services, do you regularly check for public files, overly open permissions, or unused exposed services?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Cloud Security",
+                    Explanation = "Regular cloud security audits prevent data exposure and unauthorized access."
+                },
+                new QuizQuestion
+                {
+                    Id = 35,
+                    Question = "Do you run vulnerability scans or dependency checks for known risks?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Vulnerability Management",
+                    Explanation = "Regular vulnerability scanning identifies security weaknesses before they can be exploited."
+                },
+                new QuizQuestion
+                {
+                    Id = 36,
+                    Question = "Have you defined and tested recovery objectives (RPO/RTO), including a backup restore exercise?",
+                    Options = new List<string> { "Yes", "No" },
+                    CorrectAnswerIndex = -1,
+                    Category = "Business Continuity",
+                    Explanation = "Defined and tested recovery objectives ensure business continuity after incidents."
                 }
             };
         }
 
+        public List<QuizQuestion> GetConditionalQuestions()
+        {
+            // Return all questions - the conditional logic will be handled in the form
+            return questions.OrderBy(q => q.Id).ToList();
+        }
+
+        public int GetNextQuestionId(int currentQuestionId, Dictionary<int, string> previousAnswers)
+        {
+            // Implement the specific branching logic from the JSON
+            switch (currentQuestionId)
+            {
+                case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+                    // Basic questions flow sequentially
+                    return currentQuestionId + 1;
+                
+                case 8: case 9: case 10:
+                    // Security measures flow sequentially
+                    return currentQuestionId + 1;
+                
+                case 11:
+                    // After Q11, check if website exists (Q4 = Yes) to show web security questions
+                    if (previousAnswers.ContainsKey(4) && previousAnswers[4] == "Yes")
+                        return 12; // Go to website security questions
+                    else if (previousAnswers.ContainsKey(5) && previousAnswers[5] == "Yes")
+                        return 15; // Go to backup questions
+                    else if (previousAnswers.ContainsKey(6) && previousAnswers[6] == "Yes")
+                        return 19; // Go to email questions
+                    else
+                        return 22; // Skip to incident response
+                
+                case 12: case 13:
+                    return currentQuestionId + 1; // Web security questions flow
+                
+                case 14:
+                    // After web security, check if database exists (Q5 = Yes)
+                    if (previousAnswers.ContainsKey(5) && previousAnswers[5] == "Yes")
+                        return 15; // Go to backup questions
+                    else
+                        return 19; // Skip to email questions
+                
+                case 15:
+                    // Backup question - only if Q5 = Yes
+                    return 16;
+                
+                case 16:
+                    // Backup test - only if Q15 = Yes
+                    return 17;
+                
+                case 17:
+                    // Encryption - only if Q5 = Yes AND Q3 = Yes
+                    return 18;
+                
+                case 18:
+                    // User review - check if email domain exists (Q6 = Yes)
+                    if (previousAnswers.ContainsKey(6) && previousAnswers[6] == "Yes")
+                        return 19; // Go to email security
+                    else
+                        return 22; // Skip to incident response
+                
+                case 19: case 20:
+                    return currentQuestionId + 1; // Email security flow
+                
+                case 21:
+                    return 22; // After email security, go to incident response
+                
+                case 22:
+                    return 23; // Go to next incident response question
+                
+                case 23:
+                    return 24; // Go to incident history
+                
+                case 24:
+                    // If no incidents (Q24 = No), skip incident-specific questions
+                    if (previousAnswers.ContainsKey(24) && previousAnswers[24] == "No")
+                        return 28; // Skip to reporting capabilities
+                    else
+                        return 25; // Continue with incident questions
+                
+                case 25: case 26:
+                    return currentQuestionId + 1; // Incident analysis flow
+                
+                case 27:
+                    return 28; // Go to reporting capabilities
+                
+                case 28: case 29: case 30: case 31:
+                    return currentQuestionId + 1; // Reporting capabilities flow
+                
+                case 32:
+                    // Check for advanced requirements
+                    if (previousAnswers.ContainsKey(2) && previousAnswers[2] == "Yes")
+                        return 33; // Critical sector question
+                    else if (previousAnswers.ContainsKey(7) && previousAnswers[7] == "Yes")
+                        return 34; // Cloud security question
+                    else
+                        return 35; // Vulnerability scanning
+                
+                case 33:
+                    // After critical sector, check cloud services
+                    if (previousAnswers.ContainsKey(7) && previousAnswers[7] == "Yes")
+                        return 34;
+                    else
+                        return 35;
+                
+                case 34:
+                    return 35; // Go to vulnerability scanning
+                
+                case 35:
+                    return 36; // Final question
+                
+                case 36:
+                    return -1; // End of assessment
+                
+                default:
+                    return -1; // End of assessment
+            }
+        }
+
+        public bool ShouldShowQuestion(int questionId, Dictionary<int, string> previousAnswers)
+        {
+            // Check if question should be shown based on conditions
+            switch (questionId)
+            {
+                case 12: case 13: case 14:
+                    // Website security questions - only if Q4 = Yes
+                    return previousAnswers.ContainsKey(4) && previousAnswers[4] == "Yes";
+                
+                case 15: case 18:
+                    // Backup and user review - only if Q5 = Yes
+                    return previousAnswers.ContainsKey(5) && previousAnswers[5] == "Yes";
+                
+                case 16:
+                    // Backup test - only if Q15 = Yes
+                    return previousAnswers.ContainsKey(15) && previousAnswers[15] == "Yes";
+                
+                case 17:
+                    // Encryption - only if Q5 = Yes AND Q3 = Yes
+                    return previousAnswers.ContainsKey(5) && previousAnswers[5] == "Yes" &&
+                           previousAnswers.ContainsKey(3) && previousAnswers[3] == "Yes";
+                
+                case 19: case 20: case 21:
+                    // Email security - only if Q6 = Yes
+                    return previousAnswers.ContainsKey(6) && previousAnswers[6] == "Yes";
+                
+                case 25: case 26: case 27:
+                    // Incident-specific questions - only if Q24 = Yes
+                    return previousAnswers.ContainsKey(24) && previousAnswers[24] == "Yes";
+                
+                case 33:
+                    // Critical sector - only if Q2 = Yes
+                    return previousAnswers.ContainsKey(2) && previousAnswers[2] == "Yes";
+                
+                case 34:
+                    // Cloud security - only if Q7 = Yes
+                    return previousAnswers.ContainsKey(7) && previousAnswers[7] == "Yes";
+                
+                case 35:
+                    // Vulnerability scanning - if Q2 = Yes OR Q7 = Yes
+                    return (previousAnswers.ContainsKey(2) && previousAnswers[2] == "Yes") ||
+                           (previousAnswers.ContainsKey(7) && previousAnswers[7] == "Yes");
+                
+                case 36:
+                    // Recovery objectives - if Q2 = Yes OR Q5 = Yes OR Q7 = Yes
+                    return (previousAnswers.ContainsKey(2) && previousAnswers[2] == "Yes") ||
+                           (previousAnswers.ContainsKey(5) && previousAnswers[5] == "Yes") ||
+                           (previousAnswers.ContainsKey(7) && previousAnswers[7] == "Yes");
+                
+                default:
+                    // All other questions are always shown
+                    return true;
+            }
+        }
+
         public List<QuizQuestion> GetRandomQuestions(int count = 5)
         {
-            var random = new Random();
-            return questions.OrderBy(x => random.Next()).Take(count).ToList();
+            // For backward compatibility, return first few questions
+            return questions.Take(count).ToList();
         }
 
         public List<QuizQuestion> GetQuestionsByCategory(string category)
