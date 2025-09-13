@@ -23,7 +23,7 @@ namespace LLM.Logic
                 new QuizQuestion
                 {
                     Id = 1,
-                    Question = "Are you a small\medium enterprise (SME)?",
+                    Question = "Are you a small/medium enterprise (SME)?",
                     Options = new List<string> { "Yes", "No" },
                     CorrectAnswerIndex = -1,
                     Category = "Business Profile",

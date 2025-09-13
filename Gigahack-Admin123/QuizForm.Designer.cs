@@ -94,36 +94,50 @@ namespace Gigahack_Admin123
             // 
             // btnNext
             // 
+            btnNext.BackColor = Color.FromArgb(0, 120, 215);
+            btnNext.FlatAppearance.BorderSize = 0;
+            btnNext.FlatStyle = FlatStyle.Flat;
             btnNext.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            btnNext.ForeColor = Color.White;
             btnNext.Location = new Point(509, 766);
             btnNext.Margin = new Padding(6, 6, 6, 6);
             btnNext.Name = "btnNext";
             btnNext.Size = new Size(186, 75);
             btnNext.TabIndex = 5;
             btnNext.Text = "Next Question";
-            btnNext.UseVisualStyleBackColor = true;
+            btnNext.UseVisualStyleBackColor = false;
             btnNext.Click += btnNext_Click;
             // 
             // btnStartOver
             // 
+            btnStartOver.BackColor = Color.FromArgb(220, 53, 69);
+            btnStartOver.FlatAppearance.BorderSize = 0;
+            btnStartOver.FlatStyle = FlatStyle.Flat;
+            btnStartOver.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnStartOver.ForeColor = Color.White;
             btnStartOver.Location = new Point(22, 768);
             btnStartOver.Margin = new Padding(6, 6, 6, 6);
             btnStartOver.Name = "btnStartOver";
             btnStartOver.Size = new Size(186, 75);
             btnStartOver.TabIndex = 6;
             btnStartOver.Text = "Start Over";
-            btnStartOver.UseVisualStyleBackColor = true;
+            btnStartOver.UseVisualStyleBackColor = false;
             btnStartOver.Click += btnStartOver_Click;
             // 
             // btnViewHistory
             // 
+            btnViewHistory.BackColor = Color.FromArgb(138, 43, 226);
+            btnViewHistory.FlatAppearance.BorderSize = 0;
+            btnViewHistory.FlatStyle = FlatStyle.Flat;
+            btnViewHistory.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnViewHistory.ForeColor = Color.White;
             btnViewHistory.Location = new Point(262, 766);
             btnViewHistory.Margin = new Padding(6, 6, 6, 6);
             btnViewHistory.Name = "btnViewHistory";
             btnViewHistory.Size = new Size(186, 75);
             btnViewHistory.TabIndex = 7;
             btnViewHistory.Text = "View History";
-            btnViewHistory.UseVisualStyleBackColor = true;
+            btnViewHistory.UseVisualStyleBackColor = false;
             btnViewHistory.Click += btnViewHistory_Click;
             // 
             // QuizForm

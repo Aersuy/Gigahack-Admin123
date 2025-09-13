@@ -56,22 +56,32 @@ namespace Gigahack_Admin123
             // 
             // btnClose
             // 
+            this.btnClose.BackColor = Color.FromArgb(100, 100, 100);
+            this.btnClose.FlatAppearance.BorderSize = 0;
+            this.btnClose.FlatStyle = FlatStyle.Flat;
+            this.btnClose.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            this.btnClose.ForeColor = Color.White;
             this.btnClose.Location = new Point(497, 410);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new Size(75, 30);
             this.btnClose.TabIndex = 2;
             this.btnClose.Text = "Close";
-            this.btnClose.UseVisualStyleBackColor = true;
+            this.btnClose.UseVisualStyleBackColor = false;
             this.btnClose.Click += new EventHandler(this.btnClose_Click);
             // 
             // btnClearHistory
             // 
+            this.btnClearHistory.BackColor = Color.FromArgb(220, 53, 69);
+            this.btnClearHistory.FlatAppearance.BorderSize = 0;
+            this.btnClearHistory.FlatStyle = FlatStyle.Flat;
+            this.btnClearHistory.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            this.btnClearHistory.ForeColor = Color.White;
             this.btnClearHistory.Location = new Point(12, 410);
             this.btnClearHistory.Name = "btnClearHistory";
             this.btnClearHistory.Size = new Size(100, 30);
             this.btnClearHistory.TabIndex = 3;
             this.btnClearHistory.Text = "Clear History";
-            this.btnClearHistory.UseVisualStyleBackColor = true;
+            this.btnClearHistory.UseVisualStyleBackColor = false;
             this.btnClearHistory.Click += new EventHandler(this.btnClearHistory_Click);
             // 
             // QuizHistoryForm

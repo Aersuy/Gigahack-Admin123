@@ -38,7 +38,6 @@
             this.lblTargetIP = new Label();
             this.txtTargetIP = new TextBox();
             this.btnAuditDashboard = new Button();
-            this.btnStop = new Button();
             this.btnGenerateReport = new Button();
             this.btnQuiz = new Button();
             this.btnClearResults = new Button();
@@ -107,31 +106,16 @@
             this.btnAuditDashboard.MouseEnter += (s, e) => { this.btnAuditDashboard.BackColor = Color.FromArgb(0, 100, 180); };
             this.btnAuditDashboard.MouseLeave += (s, e) => { this.btnAuditDashboard.BackColor = Color.FromArgb(0, 120, 215); };
             
-            // btnStop - Secondary Action Button
-            this.btnStop.BackColor = Color.FromArgb(196, 43, 28);
-            this.btnStop.Enabled = false;
-            this.btnStop.FlatAppearance.BorderSize = 0;
-            this.btnStop.FlatStyle = FlatStyle.Flat;
-            this.btnStop.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
-            this.btnStop.ForeColor = Color.White;
-            this.btnStop.Location = new Point(210, 110);
-            this.btnStop.Name = "btnStop";
-            this.btnStop.Size = new Size(80, 45);
-            this.btnStop.TabIndex = 4;
-            this.btnStop.Text = "⏹ Stop";
-            this.btnStop.UseVisualStyleBackColor = false;
-            this.btnStop.Click += new EventHandler(this.btnStop_Click);
-            
             // btnGenerateReport - Utility Button
             this.btnGenerateReport.BackColor = Color.FromArgb(16, 137, 62);
             this.btnGenerateReport.FlatAppearance.BorderSize = 0;
             this.btnGenerateReport.FlatStyle = FlatStyle.Flat;
             this.btnGenerateReport.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
             this.btnGenerateReport.ForeColor = Color.White;
-            this.btnGenerateReport.Location = new Point(300, 110);
+            this.btnGenerateReport.Location = new Point(210, 110);
             this.btnGenerateReport.Name = "btnGenerateReport";
             this.btnGenerateReport.Size = new Size(140, 45);
-            this.btnGenerateReport.TabIndex = 5;
+            this.btnGenerateReport.TabIndex = 4;
             this.btnGenerateReport.Text = "📄 Generate Report";
             this.btnGenerateReport.UseVisualStyleBackColor = false;
             this.btnGenerateReport.Click += new EventHandler(this.btnGenerateReport_Click);
@@ -144,10 +128,10 @@
             this.btnQuiz.FlatStyle = FlatStyle.Flat;
             this.btnQuiz.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
             this.btnQuiz.ForeColor = Color.White;
-            this.btnQuiz.Location = new Point(450, 110);
+            this.btnQuiz.Location = new Point(360, 110);
             this.btnQuiz.Name = "btnQuiz";
             this.btnQuiz.Size = new Size(130, 45);
-            this.btnQuiz.TabIndex = 6;
+            this.btnQuiz.TabIndex = 5;
             this.btnQuiz.Text = "📋 IT Assessment";
             this.btnQuiz.UseVisualStyleBackColor = false;
             this.btnQuiz.Click += new EventHandler(this.btnQuiz_Click);
@@ -160,10 +144,10 @@
             this.btnClearResults.FlatStyle = FlatStyle.Flat;
             this.btnClearResults.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
             this.btnClearResults.ForeColor = Color.White;
-            this.btnClearResults.Location = new Point(570, 110);
+            this.btnClearResults.Location = new Point(500, 110);
             this.btnClearResults.Name = "btnClearResults";
             this.btnClearResults.Size = new Size(100, 45);
-            this.btnClearResults.TabIndex = 7;
+            this.btnClearResults.TabIndex = 6;
             this.btnClearResults.Text = "🗑️ Clear";
             this.btnClearResults.UseVisualStyleBackColor = false;
             this.btnClearResults.Click += new EventHandler(this.btnClearResults_Click);
@@ -281,7 +265,6 @@
                 
                 // Button Section
                 this.btnAuditDashboard,
-                this.btnStop,
                 this.btnGenerateReport,
                 this.btnQuiz,
                 this.btnClearResults,
@@ -310,7 +293,6 @@
         private Label lblTargetIP;
         private TextBox txtTargetIP;
         private Button btnAuditDashboard;
-        private Button btnStop;
         private Button btnGenerateReport;
         private Button btnQuiz;
         private Button btnClearResults;

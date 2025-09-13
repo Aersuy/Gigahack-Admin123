@@ -47,6 +47,12 @@ namespace Gigahack_Admin123
             // Initialize workflow state
             UpdateWorkflowState();
             
+            // Make buttons rounded with proper spacing
+            MakeButtonsRounded();
+            
+            // Ensure all button text is white
+            EnsureButtonTextIsWhite();
+            
             // Add cleanup on form close
             this.FormClosed += Form1_FormClosed;
         }
@@ -61,12 +67,6 @@ namespace Gigahack_Admin123
 
 
 
-        private void btnStop_Click(object sender, EventArgs e)
-        {
-            // For synchronous scanning, you might want to add a cancellation flag
-            lblStatus.Text = "Stopping scan...";
-            // Note: You'll need to add cancellation logic to your AllPortScan method for this to work properly
-        }
 
 
         private void SetProgressBarColor(System.Drawing.Color color)
@@ -99,11 +99,62 @@ namespace Gigahack_Admin123
         [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
+        private void MakeButtonRounded(Button button, int radius = 15)
+        {
+            System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+            path.AddArc(0, 0, radius, radius, 180, 90);
+            path.AddArc(button.Width - radius, 0, radius, radius, 270, 90);
+            path.AddArc(button.Width - radius, button.Height - radius, radius, radius, 0, 90);
+            path.AddArc(0, button.Height - radius, radius, radius, 90, 90);
+            path.CloseFigure();
+            button.Region = new Region(path);
+        }
+
+        private void MakeButtonsRounded()
+        {
+            // Apply rounded corners to all buttons (keeping only rounded corners)
+            MakeButtonRounded(btnAuditDashboard, 12);
+            MakeButtonRounded(btnGenerateReport, 12);
+            MakeButtonRounded(btnQuiz, 12);
+            MakeButtonRounded(btnClearResults, 12);
+            
+            // Also round the text input and results list
+            MakeControlRounded(txtTargetIP, 8);
+            MakeControlRounded(lstResults, 10);
+        }
+
+        private void MakeControlRounded(System.Windows.Forms.Control control, int radius = 15)
+        {
+            System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+            path.AddArc(0, 0, radius, radius, 180, 90);
+            path.AddArc(control.Width - radius, 0, radius, radius, 270, 90);
+            path.AddArc(control.Width - radius, control.Height - radius, radius, radius, 0, 90);
+            path.AddArc(0, control.Height - radius, radius, radius, 90, 90);
+            path.CloseFigure();
+            control.Region = new Region(path);
+        }
+
+        private void EnsureButtonTextIsWhite()
+        {
+            // Force all button text to be white, regardless of enabled state
+            btnAuditDashboard.ForeColor = System.Drawing.Color.White;
+            btnGenerateReport.ForeColor = System.Drawing.Color.White;
+            btnQuiz.ForeColor = System.Drawing.Color.White;
+            btnClearResults.ForeColor = System.Drawing.Color.White;
+        }
+
+
         private void UpdateWorkflowState()
         {
             // Update button states based on workflow progress
             btnAuditDashboard.Enabled = isAssessmentCompleted;
             btnGenerateReport.Enabled = isAssessmentCompleted && isScanCompleted;
+            
+            // Force white text color for all buttons regardless of enabled state
+            btnAuditDashboard.ForeColor = System.Drawing.Color.White;
+            btnGenerateReport.ForeColor = System.Drawing.Color.White;
+            btnQuiz.ForeColor = System.Drawing.Color.White;
+            btnClearResults.ForeColor = System.Drawing.Color.White;
             
             // Update button text to show workflow requirements
             if (!isAssessmentCompleted)
@@ -121,6 +172,9 @@ namespace Gigahack_Admin123
                 btnAuditDashboard.Text = "🔍 Run Security Audit";
                 btnGenerateReport.Text = "📄 Generate Word Report";
             }
+            
+            // Force white text again after text changes (in case system overrides it)
+            EnsureButtonTextIsWhite();
             
             // Update status message to guide user
             if (!isAssessmentCompleted)

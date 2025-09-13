@@ -89,22 +89,32 @@ namespace Gigahack_Admin123
             // 
             // btnClose
             // 
+            this.btnClose.BackColor = Color.FromArgb(100, 100, 100);
+            this.btnClose.FlatAppearance.BorderSize = 0;
+            this.btnClose.FlatStyle = FlatStyle.Flat;
+            this.btnClose.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            this.btnClose.ForeColor = Color.White;
             this.btnClose.Location = new Point(697, 460);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new Size(75, 30);
             this.btnClose.TabIndex = 5;
             this.btnClose.Text = "Close";
-            this.btnClose.UseVisualStyleBackColor = true;
+            this.btnClose.UseVisualStyleBackColor = false;
             this.btnClose.Click += new EventHandler(this.btnClose_Click);
             // 
             // btnTakeAnother
             // 
+            this.btnTakeAnother.BackColor = Color.FromArgb(0, 120, 215);
+            this.btnTakeAnother.FlatAppearance.BorderSize = 0;
+            this.btnTakeAnother.FlatStyle = FlatStyle.Flat;
+            this.btnTakeAnother.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            this.btnTakeAnother.ForeColor = Color.White;
             this.btnTakeAnother.Location = new Point(580, 460);
             this.btnTakeAnother.Name = "btnTakeAnother";
             this.btnTakeAnother.Size = new Size(110, 30);
             this.btnTakeAnother.TabIndex = 6;
             this.btnTakeAnother.Text = "Take Another Assessment";
-            this.btnTakeAnother.UseVisualStyleBackColor = true;
+            this.btnTakeAnother.UseVisualStyleBackColor = false;
             this.btnTakeAnother.Click += new EventHandler(this.btnTakeAnother_Click);
             // 
             // QuizResultsForm
