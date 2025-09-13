@@ -42,6 +42,9 @@
             this.lblResults = new Label();
             this.lblOpenPorts = new Label();
             this.lblClosedPorts = new Label();
+            this.lblOverallScore = new Label();
+            this.lblScoreValue = new Label();
+            this.lblScoreStatus = new Label();
             this.SuspendLayout();
             // 
             // lblTitle
@@ -146,11 +149,44 @@
             this.lblClosedPorts.TabIndex = 12;
             this.lblClosedPorts.Text = "Closed: 0";
             // 
+            // lblOverallScore
+            // 
+            this.lblOverallScore.AutoSize = true;
+            this.lblOverallScore.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            this.lblOverallScore.Location = new Point(12, 400);
+            this.lblOverallScore.Name = "lblOverallScore";
+            this.lblOverallScore.Size = new Size(100, 21);
+            this.lblOverallScore.TabIndex = 13;
+            this.lblOverallScore.Text = "Overall Score:";
+            // 
+            // lblScoreValue
+            // 
+            this.lblScoreValue.AutoSize = true;
+            this.lblScoreValue.Font = new Font("Segoe UI", 48F, FontStyle.Bold);
+            this.lblScoreValue.Location = new Point(120, 380);
+            this.lblScoreValue.Name = "lblScoreValue";
+            this.lblScoreValue.Size = new Size(120, 86);
+            this.lblScoreValue.TabIndex = 14;
+            this.lblScoreValue.Text = "---";
+            // 
+            // lblScoreStatus
+            // 
+            this.lblScoreStatus.AutoSize = true;
+            this.lblScoreStatus.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            this.lblScoreStatus.Location = new Point(250, 400);
+            this.lblScoreStatus.Name = "lblScoreStatus";
+            this.lblScoreStatus.Size = new Size(200, 25);
+            this.lblScoreStatus.TabIndex = 15;
+            this.lblScoreStatus.Text = "Not Scanned";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new SizeF(7F, 15F);
             this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(800, 420);
+            this.ClientSize = new Size(800, 500);
+            this.Controls.Add(this.lblScoreStatus);
+            this.Controls.Add(this.lblScoreValue);
+            this.Controls.Add(this.lblOverallScore);
             this.Controls.Add(this.lblClosedPorts);
             this.Controls.Add(this.lblOpenPorts);
             this.Controls.Add(this.lblResults);
@@ -181,5 +217,8 @@
         private Label lblResults;
         private Label lblOpenPorts;
         private Label lblClosedPorts;
+        private Label lblOverallScore;
+        private Label lblScoreValue;
+        private Label lblScoreStatus;
     }
 }

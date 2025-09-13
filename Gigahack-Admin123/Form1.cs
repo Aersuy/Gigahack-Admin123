@@ -30,6 +30,9 @@ namespace Gigahack_Admin123
             passwordPolicyScanner = new PasswordChangeScan();
             auditScanner = new AuditScanner();
             
+            // Initialize score display
+            UpdateOverallScoreDisplay(0, Scans.Audit.DataClasses.ComplianceLevel.Red);
+            
             // Add cleanup on form close
             this.FormClosed += Form1_FormClosed;
         }
@@ -193,10 +196,12 @@ namespace Gigahack_Admin123
         {
             lstResults.Items.Clear();
             
+            // Update the prominent score display
+            UpdateOverallScoreDisplay(result.OverallScore, result.OverallCompliance);
+            
             // Header with overall compliance
             lstResults.Items.Add($"=== 🔍 MINI-AUDIT DASHBOARD ===");
             lstResults.Items.Add($"Target: {result.Target}");
-            lstResults.Items.Add($"Overall Score: {result.OverallScore}/100 {result.OverallCompliance.GetEmoji()} {result.OverallCompliance.GetText()}");
             lstResults.Items.Add($"Scan Time: {result.ScanTime:yyyy-MM-dd HH:mm:ss}");
             lstResults.Items.Add("");
             
@@ -273,6 +278,37 @@ namespace Gigahack_Admin123
                     lstResults.Items.Add($"   💡 {rec}");
                 }
                 lstResults.Items.Add("");
+            }
+        }
+
+        private void UpdateOverallScoreDisplay(int score, Scans.Audit.DataClasses.ComplianceLevel level)
+        {
+            // Update the large score value
+            lblScoreValue.Text = score.ToString();
+            
+            // Set color based on compliance level
+            switch (level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    lblScoreValue.ForeColor = Color.Green;
+                    lblScoreStatus.Text = "🟢 Good Compliance";
+                    lblScoreStatus.ForeColor = Color.Green;
+                    break;
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    lblScoreValue.ForeColor = Color.Orange;
+                    lblScoreStatus.Text = "🟡 Needs Improvement";
+                    lblScoreStatus.ForeColor = Color.Orange;
+                    break;
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                    lblScoreValue.ForeColor = Color.Red;
+                    lblScoreStatus.Text = "🔴 Critical Issues";
+                    lblScoreStatus.ForeColor = Color.Red;
+                    break;
+                default:
+                    lblScoreValue.ForeColor = Color.Gray;
+                    lblScoreStatus.Text = "Not Scanned";
+                    lblScoreStatus.ForeColor = Color.Gray;
+                    break;
             }
         }
 
