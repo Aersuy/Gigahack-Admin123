@@ -6,7 +6,12 @@ using Scans.Password.PasswordLogic;
 using Scans.Password.DataClasses;
 using Scans.Audit.AuditLogic;
 using Scans.Audit.DataClasses;
+using LLM.Logic;
+using LLM.DataClasses;
 using System.Net;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Gigahack_Admin123
 {
@@ -17,9 +22,11 @@ namespace Gigahack_Admin123
         private CVEScanner cveScanner;
         private PasswordChangeScan passwordPolicyScanner;
         private AuditScanner auditScanner;
+        private Communicate llmCommunicate;
         private CancellationTokenSource? cancellationTokenSource;
         private int openPortsCount = 0;
         private int closedPortsCount = 0;
+        private AuditResult? currentAuditResult;
 
         public Form1()
         {
@@ -29,6 +36,7 @@ namespace Gigahack_Admin123
             cveScanner = new CVEScanner();
             passwordPolicyScanner = new PasswordChangeScan();
             auditScanner = new AuditScanner();
+            llmCommunicate = new Communicate();
             
             // Initialize score display
             UpdateOverallScoreDisplay(0, Scans.Audit.DataClasses.ComplianceLevel.Red);
@@ -194,6 +202,9 @@ namespace Gigahack_Admin123
 
         private void DisplayAuditDashboardResults(AuditResult result)
         {
+            // Store the current audit result for report generation
+            currentAuditResult = result;
+            
             lstResults.Items.Clear();
             
             // Update the prominent score display
@@ -290,25 +301,258 @@ namespace Gigahack_Admin123
             switch (level)
             {
                 case Scans.Audit.DataClasses.ComplianceLevel.Green:
-                    lblScoreValue.ForeColor = Color.Green;
+                    lblScoreValue.ForeColor = System.Drawing.Color.Green;
                     lblScoreStatus.Text = "🟢 Good Compliance";
-                    lblScoreStatus.ForeColor = Color.Green;
+                    lblScoreStatus.ForeColor = System.Drawing.Color.Green;
                     break;
                 case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
-                    lblScoreValue.ForeColor = Color.Orange;
+                    lblScoreValue.ForeColor = System.Drawing.Color.Orange;
                     lblScoreStatus.Text = "🟡 Needs Improvement";
-                    lblScoreStatus.ForeColor = Color.Orange;
+                    lblScoreStatus.ForeColor = System.Drawing.Color.Orange;
                     break;
                 case Scans.Audit.DataClasses.ComplianceLevel.Red:
-                    lblScoreValue.ForeColor = Color.Red;
+                    lblScoreValue.ForeColor = System.Drawing.Color.Red;
                     lblScoreStatus.Text = "🔴 Critical Issues";
-                    lblScoreStatus.ForeColor = Color.Red;
+                    lblScoreStatus.ForeColor = System.Drawing.Color.Red;
                     break;
                 default:
-                    lblScoreValue.ForeColor = Color.Gray;
+                    lblScoreValue.ForeColor = System.Drawing.Color.Gray;
                     lblScoreStatus.Text = "Not Scanned";
-                    lblScoreStatus.ForeColor = Color.Gray;
+                    lblScoreStatus.ForeColor = System.Drawing.Color.Gray;
                     break;
+            }
+        }
+
+        private void btnGenerateReport_Click(object sender, EventArgs e)
+        {
+            if (currentAuditResult == null)
+            {
+                MessageBox.Show("Please run a security audit first before generating a report.", "No Audit Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            btnGenerateReport.Enabled = false;
+            lblStatus.Text = "Generating Word report...";
+
+            try
+            {
+                Task.Run(async () => {
+                    try
+                    {
+                        // Convert audit result to report data
+                        var reportData = ConvertAuditResultToReportData(currentAuditResult);
+                        
+                        // Generate report using LLM
+                        var report = await llmCommunicate.GenerateReport(reportData);
+
+                        this.Invoke(new Action(() => {
+                            DisplayGeneratedReport(report);
+                            lblStatus.Text = "Word report generated successfully";
+                        }));
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Invoke(new Action(() => {
+                            MessageBox.Show($"Report generation error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            lblStatus.Text = "Word report generation failed";
+                        }));
+                    }
+                    finally
+                    {
+                        this.Invoke(new Action(() => {
+                            btnGenerateReport.Enabled = true;
+                        }));
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Report generation error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblStatus.Text = "Word report generation failed";
+                btnGenerateReport.Enabled = true;
+            }
+        }
+
+        private OverallReportData ConvertAuditResultToReportData(AuditResult auditResult)
+        {
+            var reportData = new OverallReportData
+            {
+                Target = auditResult.Target,
+                OverallScore = auditResult.OverallScore,
+                ComplianceLevel = auditResult.OverallCompliance.GetText(),
+                ScanTime = auditResult.ScanTime,
+                Success = auditResult.Success,
+                ErrorMessage = auditResult.ErrorMessage,
+                
+                // Category scores
+                NetworkSecurityScore = auditResult.NetworkSecurity.Score,
+                SystemSecurityScore = auditResult.SystemSecurity.Score,
+                VulnerabilityManagementScore = auditResult.VulnerabilityManagement.Score,
+                PasswordSecurityScore = auditResult.PasswordSecurity.Score,
+                WebSecurityScore = auditResult.WebSecurity.Score,
+                
+                // Key findings from all categories
+                KeyFindings = new List<string>(),
+                Recommendations = new List<string>(),
+                Warnings = new List<string>(),
+                Errors = new List<string>()
+            };
+
+            // Collect key findings from all categories
+            foreach (var category in new[] { auditResult.NetworkSecurity, auditResult.SystemSecurity, 
+                                          auditResult.VulnerabilityManagement, auditResult.PasswordSecurity, 
+                                          auditResult.WebSecurity })
+            {
+                foreach (var item in category.Items)
+                {
+                    if (!item.Passed)
+                    {
+                        reportData.KeyFindings.Add($"{category.Name}: {item.Name} - {item.Status}");
+                    }
+                }
+                
+                reportData.Recommendations.AddRange(category.Recommendations);
+                reportData.Warnings.AddRange(category.Errors);
+            }
+
+            // Add overall recommendations
+            reportData.Recommendations.AddRange(auditResult.Recommendations);
+            reportData.Warnings.AddRange(auditResult.Warnings);
+            reportData.Errors.AddRange(auditResult.Errors);
+
+            return reportData;
+        }
+
+        private void DisplayGeneratedReport(string report)
+        {
+            try
+            {
+                // Create a save file dialog for Word document
+                using (var saveFileDialog = new SaveFileDialog())
+                {
+                    saveFileDialog.Filter = "Word Documents (*.docx)|*.docx|All Files (*.*)|*.*";
+                    saveFileDialog.FileName = $"Security_Report_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
+                    saveFileDialog.Title = "Save Security Report";
+
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        // Generate Word document
+                        GenerateWordDocument(report, saveFileDialog.FileName);
+                        
+                        // Show success message
+                        MessageBox.Show($"Security report saved successfully!\n\nLocation: {saveFileDialog.FileName}", 
+                                      "Report Generated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        
+                        // Optionally open the document
+                        var result = MessageBox.Show("Would you like to open the generated report?", 
+                                                   "Open Report", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (result == DialogResult.Yes)
+                        {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = saveFileDialog.FileName,
+                                UseShellExecute = true
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error generating Word document: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void GenerateWordDocument(string report, string filePath)
+        {
+            using (var wordDocument = WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document))
+            {
+                // Add main document part
+                var mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new Document();
+                var body = mainPart.Document.AppendChild(new Body());
+
+                // Add title
+                var titleParagraph = body.AppendChild(new Paragraph());
+                var titleRun = titleParagraph.AppendChild(new Run());
+                titleRun.AppendChild(new RunProperties(new Bold()));
+                titleRun.AppendChild(new Text("Security Audit Report"));
+                
+                // Add title formatting
+                titleParagraph.ParagraphProperties = new ParagraphProperties(
+                    new Justification() { Val = JustificationValues.Center },
+                    new SpacingBetweenLines() { After = "200" }
+                );
+
+                // Add date
+                var dateParagraph = body.AppendChild(new Paragraph());
+                var dateRun = dateParagraph.AppendChild(new Run());
+                dateRun.AppendChild(new Text($"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}"));
+                dateParagraph.ParagraphProperties = new ParagraphProperties(
+                    new Justification() { Val = JustificationValues.Center },
+                    new SpacingBetweenLines() { After = "400" }
+                );
+
+                // Add separator line
+                body.AppendChild(new Paragraph(new Run(new Text(""))));
+                body.AppendChild(new Paragraph(new Run(new Text("═══════════════════════════════════════════════════════════════"))));
+                body.AppendChild(new Paragraph(new Run(new Text(""))));
+
+                // Split report into sections and format
+                var sections = report.Split(new[] { "\n\n" }, StringSplitOptions.RemoveEmptyEntries);
+                
+                foreach (var section in sections)
+                {
+                    if (string.IsNullOrWhiteSpace(section)) continue;
+
+                    var paragraph = body.AppendChild(new Paragraph());
+                    var run = paragraph.AppendChild(new Run());
+
+                    // Check if this is a header (starts with # or is all caps)
+                    if (section.StartsWith("#") || (section.Length < 50 && section.All(c => char.IsUpper(c) || char.IsWhiteSpace(c))))
+                    {
+                        // Format as header
+                        run.AppendChild(new RunProperties(new Bold()));
+                        run.AppendChild(new Text(section.TrimStart('#', ' ')));
+                        paragraph.ParagraphProperties = new ParagraphProperties(
+                            new SpacingBetweenLines() { Before = "200", After = "100" }
+                        );
+                    }
+                    else
+                    {
+                        // Format as regular text
+                        run.AppendChild(new Text(section));
+                        paragraph.ParagraphProperties = new ParagraphProperties(
+                            new SpacingBetweenLines() { After = "100" }
+                        );
+                    }
+                }
+
+                // Add footer
+                body.AppendChild(new Paragraph(new Run(new Text(""))));
+                body.AppendChild(new Paragraph(new Run(new Text("═══════════════════════════════════════════════════════════════"))));
+                body.AppendChild(new Paragraph(new Run(new Text(""))));
+                
+                var footerParagraph = body.AppendChild(new Paragraph());
+                var footerRun = footerParagraph.AppendChild(new Run());
+                footerRun.AppendChild(new Text("This report was generated by the Security Audit Dashboard"));
+                footerParagraph.ParagraphProperties = new ParagraphProperties(
+                    new Justification() { Val = JustificationValues.Center },
+                    new SpacingBetweenLines() { Before = "200" }
+                );
+            }
+        }
+
+        private void btnQuiz_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var quizForm = new QuizForm();
+                quizForm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening quiz: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

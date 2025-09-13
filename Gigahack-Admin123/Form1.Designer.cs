@@ -36,6 +36,8 @@
             this.txtTargetIP = new TextBox();
             this.btnAuditDashboard = new Button();
             this.btnStop = new Button();
+            this.btnGenerateReport = new Button();
+            this.btnQuiz = new Button();
             this.progressBar = new ProgressBar();
             this.lblStatus = new Label();
             this.lstResults = new ListBox();
@@ -94,6 +96,26 @@
             this.btnStop.Text = "Stop Scan";
             this.btnStop.UseVisualStyleBackColor = true;
             this.btnStop.Click += new EventHandler(this.btnStop_Click);
+            // 
+            // btnGenerateReport
+            // 
+            this.btnGenerateReport.Location = new Point(300, 85);
+            this.btnGenerateReport.Name = "btnGenerateReport";
+            this.btnGenerateReport.Size = new Size(150, 40);
+            this.btnGenerateReport.TabIndex = 6;
+            this.btnGenerateReport.Text = "📄 Generate Word Report";
+            this.btnGenerateReport.UseVisualStyleBackColor = true;
+            this.btnGenerateReport.Click += new EventHandler(this.btnGenerateReport_Click);
+            // 
+            // btnQuiz
+            // 
+            this.btnQuiz.Location = new Point(460, 85);
+            this.btnQuiz.Name = "btnQuiz";
+            this.btnQuiz.Size = new Size(120, 40);
+            this.btnQuiz.TabIndex = 7;
+            this.btnQuiz.Text = "📋 IT Assessment";
+            this.btnQuiz.UseVisualStyleBackColor = true;
+            this.btnQuiz.Click += new EventHandler(this.btnQuiz_Click);
             // 
             // progressBar
             // 
@@ -194,6 +216,8 @@
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnStop);
+            this.Controls.Add(this.btnQuiz);
+            this.Controls.Add(this.btnGenerateReport);
             this.Controls.Add(this.btnAuditDashboard);
             this.Controls.Add(this.txtTargetIP);
             this.Controls.Add(this.lblTargetIP);
@@ -211,6 +235,8 @@
         private TextBox txtTargetIP;
         private Button btnAuditDashboard;
         private Button btnStop;
+        private Button btnGenerateReport;
+        private Button btnQuiz;
         private ProgressBar progressBar;
         private Label lblStatus;
         private ListBox lstResults;
