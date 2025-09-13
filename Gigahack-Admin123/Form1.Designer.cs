@@ -41,6 +41,7 @@
             this.btnStop = new Button();
             this.btnGenerateReport = new Button();
             this.btnQuiz = new Button();
+            this.btnClearResults = new Button();
             this.progressBar = new ProgressBar();
             this.lblStatus = new Label();
             this.lstResults = new ListBox();
@@ -154,6 +155,23 @@
             this.btnQuiz.Click += new EventHandler(this.btnQuiz_Click);
             this.btnQuiz.MouseEnter += (s, e) => { this.btnQuiz.BackColor = Color.FromArgb(120, 40, 200); };
             this.btnQuiz.MouseLeave += (s, e) => { this.btnQuiz.BackColor = Color.FromArgb(138, 43, 226); };
+            
+            // btnClearResults
+            this.btnClearResults.BackColor = Color.FromArgb(220, 53, 69);
+            this.btnClearResults.FlatAppearance.BorderSize = 0;
+            this.btnClearResults.FlatStyle = FlatStyle.Flat;
+            this.btnClearResults.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
+            this.btnClearResults.ForeColor = Color.White;
+            this.btnClearResults.Location = new Point(570, 110);
+            this.btnClearResults.Name = "btnClearResults";
+            this.btnClearResults.Size = new Size(100, 45);
+            this.btnClearResults.TabIndex = 7;
+            this.btnClearResults.Text = "🗑️ Clear";
+            this.btnClearResults.UseVisualStyleBackColor = false;
+            this.btnClearResults.Click += new EventHandler(this.btnClearResults_Click);
+            this.btnClearResults.MouseEnter += (s, e) => { this.btnClearResults.BackColor = Color.FromArgb(200, 35, 51); };
+            this.btnClearResults.MouseLeave += (s, e) => { this.btnClearResults.BackColor = Color.FromArgb(220, 53, 69); };
+            
             // =============================================================================
             // PROGRESS AND STATUS SECTION
             // =============================================================================
@@ -161,10 +179,12 @@
             // progressBar
             this.progressBar.Location = new Point(20, 170);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new Size(760, 8);
+            this.progressBar.Size = new Size(760, 12);
             this.progressBar.Style = ProgressBarStyle.Continuous;
             this.progressBar.TabIndex = 7;
-            this.progressBar.ForeColor = Color.FromArgb(0, 120, 215);
+            this.progressBar.Minimum = 0;
+            this.progressBar.Maximum = 100;
+            this.progressBar.Value = 0;
             
             // lblStatus
             this.lblStatus.AutoSize = true;
@@ -284,6 +304,7 @@
                 this.btnStop,
                 this.btnGenerateReport,
                 this.btnQuiz,
+                this.btnClearResults,
                 
                 // Progress Section
                 this.progressBar,
@@ -314,6 +335,7 @@
         private Button btnStop;
         private Button btnGenerateReport;
         private Button btnQuiz;
+        private Button btnClearResults;
         private ProgressBar progressBar;
         private Label lblStatus;
         private ListBox lstResults;

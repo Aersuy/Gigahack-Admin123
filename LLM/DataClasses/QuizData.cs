@@ -74,6 +74,26 @@ namespace LLM.DataClasses
         public List<string> Warnings { get; set; } = new List<string>();
         public List<string> Errors { get; set; } = new List<string>();
         public AssessmentSummary Summary { get; set; } = new AssessmentSummary();
+        
+        // Store every single answer for comprehensive analysis
+        public List<DetailedAnswer> AllAnswers { get; set; } = new List<DetailedAnswer>();
+        public Dictionary<string, string> RawAnswerData { get; set; } = new Dictionary<string, string>();
+    }
+
+    public class DetailedAnswer
+    {
+        public int QuestionId { get; set; }
+        public string Question { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string SelectedAnswer { get; set; } = string.Empty;
+        public int SelectedIndex { get; set; }
+        public List<string> AllOptions { get; set; } = new List<string>();
+        public int SecurityScore { get; set; } // 1-4 scale
+        public string SecurityLevel { get; set; } = string.Empty;
+        public string Explanation { get; set; } = string.Empty;
+        public DateTime AnsweredAt { get; set; } = DateTime.Now;
+        public string Impact { get; set; } = string.Empty;
+        public List<string> Implications { get; set; } = new List<string>();
     }
 
     public class AssessmentCategory

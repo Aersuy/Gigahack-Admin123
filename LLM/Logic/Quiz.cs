@@ -706,12 +706,137 @@ namespace LLM.Logic
                 assessmentResult.Categories.Add(category);
             }
 
+            // Store every single answer with detailed information
+            assessmentResult.AllAnswers = PopulateDetailedAnswers(quizResult, userAnswers);
+            assessmentResult.RawAnswerData = userAnswers.ToDictionary(
+                kvp => $"Q{kvp.Key}", 
+                kvp => kvp.Value
+            );
+
             // Generate overall recommendations and summary
             assessmentResult.Recommendations = GenerateOverallRecommendations(assessmentResult.Categories, userAnswers);
             assessmentResult.Warnings = GenerateWarnings(assessmentResult.Categories, userAnswers);
             assessmentResult.Summary = GenerateAssessmentSummary(quizResult, userAnswers, assessmentResult.Categories);
 
             return assessmentResult;
+        }
+
+        private List<DetailedAnswer> PopulateDetailedAnswers(QuizResult quizResult, Dictionary<int, string> userAnswers)
+        {
+            var detailedAnswers = new List<DetailedAnswer>();
+
+            foreach (var question in quizResult.Questions.Where(q => userAnswers.ContainsKey(q.Id)))
+            {
+                var answer = quizResult.Session.Answers.FirstOrDefault(a => a.QuestionId == question.Id);
+                var selectedIndex = answer?.SelectedAnswerIndex ?? -1;
+                var securityScore = answer != null ? CalculateSecurityScore(question, selectedIndex) : 0;
+                
+                var detailedAnswer = new DetailedAnswer
+                {
+                    QuestionId = question.Id,
+                    Question = question.Question,
+                    Category = question.Category,
+                    SelectedAnswer = userAnswers[question.Id],
+                    SelectedIndex = selectedIndex,
+                    AllOptions = new List<string>(question.Options),
+                    SecurityScore = securityScore,
+                    SecurityLevel = GetSecurityLevel(securityScore * 25), // Convert 1-4 to percentage
+                    Explanation = question.Explanation,
+                    AnsweredAt = answer?.AnsweredAt ?? DateTime.Now,
+                    Impact = GetAnswerImpact(question, selectedIndex),
+                    Implications = GetAnswerImplications(question, selectedIndex)
+                };
+
+                detailedAnswers.Add(detailedAnswer);
+            }
+
+            return detailedAnswers.OrderBy(a => a.QuestionId).ToList();
+        }
+
+        private string GetAnswerImpact(QuizQuestion question, int selectedIndex)
+        {
+            // Determine the impact based on the question category and selected answer
+            var impact = selectedIndex switch
+            {
+                0 => "Positive - Strong security posture",
+                1 => "Neutral - Adequate security measures",
+                2 => "Concerning - Basic security gaps",
+                3 => "Critical - Significant security risk",
+                _ => "Unknown - No response provided"
+            };
+
+            // Add category-specific context
+            var categoryContext = question.Category.ToLower() switch
+            {
+                var c when c.Contains("security") => " for organizational security framework",
+                var c when c.Contains("network") => " for network infrastructure protection",
+                var c when c.Contains("access") => " for access control and authentication",
+                var c when c.Contains("incident") => " for incident response capabilities",
+                var c when c.Contains("compliance") => " for regulatory compliance posture",
+                _ => " for overall cybersecurity posture"
+            };
+
+            return impact + categoryContext;
+        }
+
+        private List<string> GetAnswerImplications(QuizQuestion question, int selectedIndex)
+        {
+            var implications = new List<string>();
+
+            // Generate implications based on the security score and question context
+            var securityScore = CalculateSecurityScore(question, selectedIndex);
+            
+            switch (securityScore)
+            {
+                case 4: // Excellent
+                    implications.Add("Demonstrates strong security awareness and implementation");
+                    implications.Add("Contributes positively to overall security posture");
+                    implications.Add("Aligns with cybersecurity best practices");
+                    break;
+                    
+                case 3: // Good
+                    implications.Add("Shows adequate security measures in place");
+                    implications.Add("Minor improvements could enhance security further");
+                    break;
+                    
+                case 2: // Fair
+                    implications.Add("Indicates potential security gaps that need attention");
+                    implications.Add("May increase organizational risk if not addressed");
+                    implications.Add("Requires security improvements to meet best practices");
+                    break;
+                    
+                case 1: // Poor
+                    implications.Add("Represents significant security vulnerability");
+                    implications.Add("Immediate attention required to reduce risk");
+                    implications.Add("Could lead to security incidents if not remediated");
+                    implications.Add("May impact compliance with security standards");
+                    break;
+                    
+                default:
+                    implications.Add("Unable to assess security impact without response");
+                    break;
+            }
+
+            // Add question-specific implications
+            if (question.Question.ToLower().Contains("multi-factor") || question.Question.ToLower().Contains("mfa"))
+            {
+                if (securityScore <= 2)
+                    implications.Add("Lack of MFA significantly increases account compromise risk");
+            }
+            
+            if (question.Question.ToLower().Contains("backup"))
+            {
+                if (securityScore <= 2)
+                    implications.Add("Inadequate backup strategy could result in data loss during incidents");
+            }
+
+            if (question.Question.ToLower().Contains("training") || question.Question.ToLower().Contains("awareness"))
+            {
+                if (securityScore <= 2)
+                    implications.Add("Limited security training increases human error and phishing susceptibility");
+            }
+
+            return implications;
         }
 
         private string GetAnswerStatus(int score)

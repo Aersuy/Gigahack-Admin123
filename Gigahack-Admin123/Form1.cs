@@ -27,6 +27,7 @@ namespace Gigahack_Admin123
         private int openPortsCount = 0;
         private int closedPortsCount = 0;
         private AuditResult? currentAuditResult;
+        private LLM.DataClasses.AssessmentResult? currentAssessmentResult;
 
         public Form1()
         {
@@ -67,6 +68,36 @@ namespace Gigahack_Admin123
             lblOpenPorts.Text = $"Open: {openPortsCount}";
             lblClosedPorts.Text = $"Closed: {closedPortsCount}";
         }
+
+        private void SetProgressBarColor(System.Drawing.Color color)
+        {
+            // Use Windows API to set progress bar color to green
+            try
+            {
+                // Send a message to set the progress bar color
+                // PBM_SETBARCOLOR = 0x409, Green = 0x00FF00
+                if (color == System.Drawing.Color.Green)
+                {
+                    SendMessage(progressBar.Handle, 0x409, 0, 0x00FF00);
+                }
+                else if (color == System.Drawing.Color.Red)
+                {
+                    SendMessage(progressBar.Handle, 0x409, 0, 0xFF0000); // Red in BGR format
+                }
+                else
+                {
+                    // Reset to default
+                    SendMessage(progressBar.Handle, 0x409, 0, -1);
+                }
+            }
+            catch
+            {
+                // Fallback: just continue without color change if API fails
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
 
 
@@ -162,7 +193,11 @@ namespace Gigahack_Admin123
         private void btnAuditDashboard_Click(object sender, EventArgs e)
         {
             btnAuditDashboard.Enabled = false;
-            lblStatus.Text = "Running comprehensive security audit...";
+            lblStatus.Text = "Initializing security audit...";
+            
+            // Reset and start progress bar with green color
+            progressBar.Value = 0;
+            SetProgressBarColor(System.Drawing.Color.Green);
 
             try
             {
@@ -170,16 +205,70 @@ namespace Gigahack_Admin123
                     try
                     {
                         var targetIP = !string.IsNullOrEmpty(txtTargetIP.Text) ? txtTargetIP.Text : "127.0.0.1";
+                        
+                        // Update progress during different phases of the audit
+                        this.Invoke(new Action(() => {
+                            progressBar.Value = 10;
+                            lblStatus.Text = "Starting network scan...";
+                        }));
+                        
+                        await Task.Delay(500); // Small delay to show progress
+                        
+                        this.Invoke(new Action(() => {
+                            progressBar.Value = 25;
+                            lblStatus.Text = "Scanning network ports...";
+                        }));
+                        
+                        // Start the actual audit
                         var result = await auditScanner.PerformMiniAudit(targetIP);
+                        
+                        // Simulate progress updates during scan phases
+                        this.Invoke(new Action(() => {
+                            progressBar.Value = 50;
+                            lblStatus.Text = "Analyzing email security...";
+                        }));
+                        
+                        await Task.Delay(300);
+                        
+                        this.Invoke(new Action(() => {
+                            progressBar.Value = 70;
+                            lblStatus.Text = "Checking password policies...";
+                        }));
+                        
+                        await Task.Delay(300);
+                        
+                        this.Invoke(new Action(() => {
+                            progressBar.Value = 85;
+                            lblStatus.Text = "Scanning for vulnerabilities...";
+                        }));
+                        
+                        await Task.Delay(300);
+                        
+                        this.Invoke(new Action(() => {
+                            progressBar.Value = 95;
+                            lblStatus.Text = "Generating security report...";
+                        }));
+                        
+                        await Task.Delay(200);
 
                         this.Invoke(new Action(() => {
+                            progressBar.Value = 100;
                             DisplayAuditDashboardResults(result);
-                            lblStatus.Text = "Security audit completed";
+                            lblStatus.Text = "Security audit completed successfully";
+                        }));
+                        
+                        // Keep progress bar full for a moment, then reset
+                        await Task.Delay(2000);
+                        this.Invoke(new Action(() => {
+                            progressBar.Value = 0;
+                            SetProgressBarColor(System.Drawing.Color.Gray); // Reset to default color
                         }));
                     }
                     catch (Exception ex)
                     {
                         this.Invoke(new Action(() => {
+                            progressBar.Value = 0;
+                            SetProgressBarColor(System.Drawing.Color.Red); // Show red for error
                             MessageBox.Show($"Audit error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             lblStatus.Text = "Audit failed";
                         }));
@@ -196,6 +285,8 @@ namespace Gigahack_Admin123
             {
                 MessageBox.Show($"Audit error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 lblStatus.Text = "Audit failed";
+                progressBar.Value = 0;
+                SetProgressBarColor(System.Drawing.Color.Red);
                 btnAuditDashboard.Enabled = true;
             }
         }
@@ -266,6 +357,29 @@ namespace Gigahack_Admin123
         {
             lstResults.Items.Add($"=== {category.Level.GetEmoji()} {category.Name.ToUpper()} ===");
             lstResults.Items.Add($"Score: {category.Score}/100 {category.Level.GetEmoji()} {category.Level.GetText()}");
+            
+            // Add category-specific suggestions below the score
+            if (category.Name.Equals("Password Security", StringComparison.OrdinalIgnoreCase))
+            {
+                AddPasswordSecuritySuggestions(category);
+            }
+            else if (category.Name.Equals("Web Security", StringComparison.OrdinalIgnoreCase))
+            {
+                AddWebSecuritySuggestions(category);
+            }
+            else if (category.Name.Equals("Network Security", StringComparison.OrdinalIgnoreCase))
+            {
+                AddNetworkSecuritySuggestions(category);
+            }
+            else if (category.Name.Equals("System Security", StringComparison.OrdinalIgnoreCase))
+            {
+                AddSystemSecuritySuggestions(category);
+            }
+            else if (category.Name.Equals("Vulnerability Management", StringComparison.OrdinalIgnoreCase))
+            {
+                AddVulnerabilityManagementSuggestions(category);
+            }
+            
             lstResults.Items.Add("");
 
             foreach (var item in category.Items)
@@ -283,13 +397,194 @@ namespace Gigahack_Admin123
 
             if (category.Recommendations.Any())
             {
-                lstResults.Items.Add("   Recommendations:");
+                lstResults.Items.Add("   📋 Recommendations:");
                 foreach (var rec in category.Recommendations)
                 {
                     lstResults.Items.Add($"   💡 {rec}");
                 }
                 lstResults.Items.Add("");
             }
+        }
+
+        private void AddPasswordSecuritySuggestions(SecurityCategory category)
+        {
+            lstResults.Items.Add("   🔐 Password Security Suggestions:");
+            
+            // Add debug information to see what's happening
+            lstResults.Items.Add($"   Debug: Score={category.Score}, Level={category.Level}, Name='{category.Name}'");
+            
+            // Provide suggestions based on the score level
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    lstResults.Items.Add("   ✅ Excellent password security posture!");
+                    lstResults.Items.Add("   • Consider implementing passwordless authentication where possible");
+                    lstResults.Items.Add("   • Regular security awareness training for users");
+                    lstResults.Items.Add("   • Monitor for compromised credentials in data breaches");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    lstResults.Items.Add("   ⚠️ Good foundation, but improvements needed:");
+                    lstResults.Items.Add("   • Enable Multi-Factor Authentication (MFA) for all accounts");
+                    lstResults.Items.Add("   • Implement password complexity requirements");
+                    lstResults.Items.Add("   • Set up account lockout policies");
+                    lstResults.Items.Add("   • Regular password expiration (90-180 days)");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                default: // Handle any edge cases including score of 0
+                    lstResults.Items.Add("   🚨 CRITICAL: Immediate password security improvements required:");
+                    lstResults.Items.Add("   • URGENT: Enable Multi-Factor Authentication immediately");
+                    lstResults.Items.Add("   • Enforce minimum 12-character passwords");
+                    lstResults.Items.Add("   • Require uppercase, lowercase, numbers, and special characters");
+                    lstResults.Items.Add("   • Implement account lockout after 5 failed attempts");
+                    lstResults.Items.Add("   • Enable password history (remember last 12 passwords)");
+                    lstResults.Items.Add("   • Force password changes for all users within 30 days");
+                    break;
+            }
+            
+            // Add general best practices
+            lstResults.Items.Add("   📚 Best Practices:");
+            lstResults.Items.Add("   • Use a reputable password manager");
+            lstResults.Items.Add("   • Never reuse passwords across different systems");
+            lstResults.Items.Add("   • Regular security awareness training");
+            lstResults.Items.Add("   • Monitor for suspicious login activities");
+        }
+
+        private void AddWebSecuritySuggestions(SecurityCategory category)
+        {
+            lstResults.Items.Add("   🌐 Web Security Suggestions:");
+            
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    lstResults.Items.Add("   ✅ Strong web security implementation!");
+                    lstResults.Items.Add("   • Consider implementing Content Security Policy (CSP)");
+                    lstResults.Items.Add("   • Regular security header audits");
+                    lstResults.Items.Add("   • Monitor for new web vulnerabilities");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    lstResults.Items.Add("   ⚠️ Web security needs attention:");
+                    lstResults.Items.Add("   • Ensure all traffic uses HTTPS with valid certificates");
+                    lstResults.Items.Add("   • Implement security headers (HSTS, X-Frame-Options)");
+                    lstResults.Items.Add("   • Regular TLS configuration reviews");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                    lstResults.Items.Add("   🚨 CRITICAL: Web security vulnerabilities detected:");
+                    lstResults.Items.Add("   • URGENT: Enable HTTPS for all web applications");
+                    lstResults.Items.Add("   • Install valid SSL/TLS certificates");
+                    lstResults.Items.Add("   • Configure security headers immediately");
+                    lstResults.Items.Add("   • Disable weak TLS protocols (TLS 1.0, 1.1)");
+                    break;
+            }
+        }
+
+        private void AddNetworkSecuritySuggestions(SecurityCategory category)
+        {
+            lstResults.Items.Add("   🛡️ Network Security Suggestions:");
+            
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    lstResults.Items.Add("   ✅ Strong network security posture!");
+                    lstResults.Items.Add("   • Continue monitoring for new threats");
+                    lstResults.Items.Add("   • Regular firewall rule reviews");
+                    lstResults.Items.Add("   • Consider network segmentation improvements");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    lstResults.Items.Add("   ⚠️ Network security improvements needed:");
+                    lstResults.Items.Add("   • Close unnecessary open ports");
+                    lstResults.Items.Add("   • Implement proper firewall rules");
+                    lstResults.Items.Add("   • Regular network vulnerability scanning");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                    lstResults.Items.Add("   🚨 CRITICAL: Network security issues found:");
+                    lstResults.Items.Add("   • URGENT: Close high-risk open ports");
+                    lstResults.Items.Add("   • Implement network firewall immediately");
+                    lstResults.Items.Add("   • Disable unnecessary network services");
+                    lstResults.Items.Add("   • Enable network intrusion detection");
+                    break;
+            }
+        }
+
+        private void AddSystemSecuritySuggestions(SecurityCategory category)
+        {
+            lstResults.Items.Add("   💻 System Security Suggestions:");
+            
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    lstResults.Items.Add("   ✅ Strong system security configuration!");
+                    lstResults.Items.Add("   • Continue regular system monitoring");
+                    lstResults.Items.Add("   • Implement advanced threat detection");
+                    lstResults.Items.Add("   • Regular security baseline reviews");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    lstResults.Items.Add("   ⚠️ System security needs improvements:");
+                    lstResults.Items.Add("   • Enable automatic security updates");
+                    lstResults.Items.Add("   • Implement endpoint detection and response (EDR)");
+                    lstResults.Items.Add("   • Regular system hardening reviews");
+                    lstResults.Items.Add("   • Configure centralized logging");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                    lstResults.Items.Add("   🚨 CRITICAL: System security vulnerabilities found:");
+                    lstResults.Items.Add("   • URGENT: Install security patches immediately");
+                    lstResults.Items.Add("   • Enable Windows Defender or equivalent antivirus");
+                    lstResults.Items.Add("   • Disable unnecessary system services");
+                    lstResults.Items.Add("   • Configure Windows Firewall");
+                    lstResults.Items.Add("   • Enable User Account Control (UAC)");
+                    break;
+            }
+            
+            lstResults.Items.Add("   📚 Best Practices:");
+            lstResults.Items.Add("   • Regular system updates and patches");
+            lstResults.Items.Add("   • Principle of least privilege for user accounts");
+            lstResults.Items.Add("   • Regular security scanning and monitoring");
+            lstResults.Items.Add("   • Backup and disaster recovery planning");
+        }
+
+        private void AddVulnerabilityManagementSuggestions(SecurityCategory category)
+        {
+            lstResults.Items.Add("   🔍 Vulnerability Management Suggestions:");
+            
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    lstResults.Items.Add("   ✅ Excellent vulnerability management program!");
+                    lstResults.Items.Add("   • Continue regular vulnerability assessments");
+                    lstResults.Items.Add("   • Implement threat intelligence feeds");
+                    lstResults.Items.Add("   • Consider penetration testing");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    lstResults.Items.Add("   ⚠️ Vulnerability management needs enhancement:");
+                    lstResults.Items.Add("   • Implement automated vulnerability scanning");
+                    lstResults.Items.Add("   • Establish patch management procedures");
+                    lstResults.Items.Add("   • Regular CVE monitoring for critical systems");
+                    lstResults.Items.Add("   • Create vulnerability remediation timeline");
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                    lstResults.Items.Add("   🚨 CRITICAL: Vulnerability management gaps detected:");
+                    lstResults.Items.Add("   • URGENT: Scan for critical vulnerabilities immediately");
+                    lstResults.Items.Add("   • Prioritize patching of internet-facing systems");
+                    lstResults.Items.Add("   • Implement emergency patch procedures");
+                    lstResults.Items.Add("   • Consider taking vulnerable systems offline");
+                    lstResults.Items.Add("   • Establish incident response procedures");
+                    break;
+            }
+            
+            lstResults.Items.Add("   📚 Best Practices:");
+            lstResults.Items.Add("   • Monthly vulnerability scans at minimum");
+            lstResults.Items.Add("   • Risk-based vulnerability prioritization");
+            lstResults.Items.Add("   • Integration with patch management systems");
+            lstResults.Items.Add("   • Regular security awareness training");
         }
 
         private void UpdateOverallScoreDisplay(int score, Scans.Audit.DataClasses.ComplianceLevel level)
@@ -359,9 +654,9 @@ namespace Gigahack_Admin123
                     }
                     finally
                     {
-                        this.Invoke(new Action(() => {
+                    this.Invoke(new Action(() => {
                             btnGenerateReport.Enabled = true;
-                        }));
+                    }));
                     }
                 });
             }
@@ -420,7 +715,324 @@ namespace Gigahack_Admin123
             reportData.Warnings.AddRange(auditResult.Warnings);
             reportData.Errors.AddRange(auditResult.Errors);
 
+            // Extract detailed category suggestions
+            reportData.NetworkSecuritySuggestions = ExtractCategorySuggestions(auditResult.NetworkSecurity);
+            reportData.SystemSecuritySuggestions = ExtractCategorySuggestions(auditResult.SystemSecurity);
+            reportData.VulnerabilityManagementSuggestions = ExtractCategorySuggestions(auditResult.VulnerabilityManagement);
+            reportData.PasswordSecuritySuggestions = ExtractCategorySuggestions(auditResult.PasswordSecurity);
+            reportData.WebSecuritySuggestions = ExtractCategorySuggestions(auditResult.WebSecurity);
+
+            // Include assessment data if available
+            if (currentAssessmentResult != null)
+            {
+                reportData.Assessment = currentAssessmentResult;
+                // Debug: Add to key findings to verify data is being included
+                reportData.KeyFindings.Add($"DEBUG: Assessment data included - Grade: {currentAssessmentResult.SecurityGrade}, Score: {currentAssessmentResult.SecurityScore}");
+            }
+            else
+            {
+                // Debug: Indicate no assessment data
+                reportData.KeyFindings.Add("DEBUG: No assessment data available - complete IT Infrastructure Assessment first");
+            }
+
             return reportData;
+        }
+
+        private LLM.DataClasses.CategorySuggestions ExtractCategorySuggestions(Scans.Audit.DataClasses.SecurityCategory category)
+        {
+            var suggestions = new LLM.DataClasses.CategorySuggestions
+            {
+                CategoryName = category.Name,
+                Score = category.Score,
+                ComplianceLevel = category.Level.GetText()
+            };
+
+            // Generate suggestions based on category type and compliance level
+            switch (category.Name.ToLower())
+            {
+                case "password security":
+                    suggestions = GeneratePasswordSecuritySuggestions(category);
+                    break;
+                case "web security":
+                    suggestions = GenerateWebSecuritySuggestions(category);
+                    break;
+                case "network security":
+                    suggestions = GenerateNetworkSecuritySuggestions(category);
+                    break;
+                case "system security":
+                    suggestions = GenerateSystemSecuritySuggestions(category);
+                    break;
+                case "vulnerability management":
+                    suggestions = GenerateVulnerabilityManagementSuggestions(category);
+                    break;
+                default:
+                    suggestions.SummaryMessage = $"{category.Name} scored {category.Score}/100";
+                    break;
+            }
+
+            return suggestions;
+        }
+
+        private LLM.DataClasses.CategorySuggestions GeneratePasswordSecuritySuggestions(Scans.Audit.DataClasses.SecurityCategory category)
+        {
+            var suggestions = new LLM.DataClasses.CategorySuggestions
+            {
+                CategoryName = category.Name,
+                Score = category.Score,
+                ComplianceLevel = category.Level.GetText()
+            };
+
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    suggestions.SummaryMessage = "Excellent password security posture!";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Consider implementing passwordless authentication where possible",
+                        "Regular security awareness training for users",
+                        "Monitor for compromised credentials in data breaches"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    suggestions.SummaryMessage = "Good foundation, but improvements needed";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Enable Multi-Factor Authentication (MFA) for all accounts",
+                        "Implement password complexity requirements",
+                        "Set up account lockout policies",
+                        "Regular password expiration (90-180 days)"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                default: // Handle any edge cases including score of 0
+                    suggestions.SummaryMessage = "CRITICAL: Immediate password security improvements required";
+                    suggestions.CriticalActions.AddRange(new[]
+                    {
+                        "URGENT: Enable Multi-Factor Authentication immediately",
+                        "Enforce minimum 12-character passwords",
+                        "Require uppercase, lowercase, numbers, and special characters",
+                        "Implement account lockout after 5 failed attempts",
+                        "Enable password history (remember last 12 passwords)",
+                        "Force password changes for all users within 30 days"
+                    });
+                    break;
+            }
+            
+            suggestions.BestPractices.AddRange(new[]
+            {
+                "Use a reputable password manager",
+                "Never reuse passwords across different systems",
+                "Regular security awareness training",
+                "Monitor for suspicious login activities"
+            });
+
+            return suggestions;
+        }
+
+        private LLM.DataClasses.CategorySuggestions GenerateWebSecuritySuggestions(Scans.Audit.DataClasses.SecurityCategory category)
+        {
+            var suggestions = new LLM.DataClasses.CategorySuggestions
+            {
+                CategoryName = category.Name,
+                Score = category.Score,
+                ComplianceLevel = category.Level.GetText()
+            };
+
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    suggestions.SummaryMessage = "Strong web security implementation!";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Consider implementing Content Security Policy (CSP)",
+                        "Regular security header audits",
+                        "Monitor for new web vulnerabilities"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    suggestions.SummaryMessage = "Web security needs attention";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Ensure all traffic uses HTTPS with valid certificates",
+                        "Implement security headers (HSTS, X-Frame-Options)",
+                        "Regular TLS configuration reviews"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                    suggestions.SummaryMessage = "CRITICAL: Web security vulnerabilities detected";
+                    suggestions.CriticalActions.AddRange(new[]
+                    {
+                        "URGENT: Enable HTTPS for all web applications",
+                        "Install valid SSL/TLS certificates",
+                        "Configure security headers immediately",
+                        "Disable weak TLS protocols (TLS 1.0, 1.1)"
+                    });
+                    break;
+            }
+
+            return suggestions;
+        }
+
+        private LLM.DataClasses.CategorySuggestions GenerateNetworkSecuritySuggestions(Scans.Audit.DataClasses.SecurityCategory category)
+        {
+            var suggestions = new LLM.DataClasses.CategorySuggestions
+            {
+                CategoryName = category.Name,
+                Score = category.Score,
+                ComplianceLevel = category.Level.GetText()
+            };
+
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    suggestions.SummaryMessage = "Strong network security posture!";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Continue monitoring for new threats",
+                        "Regular firewall rule reviews",
+                        "Consider network segmentation improvements"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    suggestions.SummaryMessage = "Network security improvements needed";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Close unnecessary open ports",
+                        "Implement proper firewall rules",
+                        "Regular network vulnerability scanning"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                    suggestions.SummaryMessage = "CRITICAL: Network security issues found";
+                    suggestions.CriticalActions.AddRange(new[]
+                    {
+                        "URGENT: Close high-risk open ports",
+                        "Implement network firewall immediately",
+                        "Disable unnecessary network services",
+                        "Enable network intrusion detection"
+                    });
+                    break;
+            }
+
+            return suggestions;
+        }
+
+        private LLM.DataClasses.CategorySuggestions GenerateSystemSecuritySuggestions(Scans.Audit.DataClasses.SecurityCategory category)
+        {
+            var suggestions = new LLM.DataClasses.CategorySuggestions
+            {
+                CategoryName = category.Name,
+                Score = category.Score,
+                ComplianceLevel = category.Level.GetText()
+            };
+
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    suggestions.SummaryMessage = "Strong system security configuration!";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Continue regular system monitoring",
+                        "Implement advanced threat detection",
+                        "Regular security baseline reviews"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    suggestions.SummaryMessage = "System security needs improvements";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Enable automatic security updates",
+                        "Implement endpoint detection and response (EDR)",
+                        "Regular system hardening reviews",
+                        "Configure centralized logging"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                    suggestions.SummaryMessage = "CRITICAL: System security vulnerabilities found";
+                    suggestions.CriticalActions.AddRange(new[]
+                    {
+                        "URGENT: Install security patches immediately",
+                        "Enable Windows Defender or equivalent antivirus",
+                        "Disable unnecessary system services",
+                        "Configure Windows Firewall",
+                        "Enable User Account Control (UAC)"
+                    });
+                    break;
+            }
+            
+            suggestions.BestPractices.AddRange(new[]
+            {
+                "Regular system updates and patches",
+                "Principle of least privilege for user accounts",
+                "Regular security scanning and monitoring",
+                "Backup and disaster recovery planning"
+            });
+
+            return suggestions;
+        }
+
+        private LLM.DataClasses.CategorySuggestions GenerateVulnerabilityManagementSuggestions(Scans.Audit.DataClasses.SecurityCategory category)
+        {
+            var suggestions = new LLM.DataClasses.CategorySuggestions
+            {
+                CategoryName = category.Name,
+                Score = category.Score,
+                ComplianceLevel = category.Level.GetText()
+            };
+
+            switch (category.Level)
+            {
+                case Scans.Audit.DataClasses.ComplianceLevel.Green:
+                    suggestions.SummaryMessage = "Excellent vulnerability management program!";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Continue regular vulnerability assessments",
+                        "Implement threat intelligence feeds",
+                        "Consider penetration testing"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
+                    suggestions.SummaryMessage = "Vulnerability management needs enhancement";
+                    suggestions.ImmediateSuggestions.AddRange(new[]
+                    {
+                        "Implement automated vulnerability scanning",
+                        "Establish patch management procedures",
+                        "Regular CVE monitoring for critical systems",
+                        "Create vulnerability remediation timeline"
+                    });
+                    break;
+                    
+                case Scans.Audit.DataClasses.ComplianceLevel.Red:
+                    suggestions.SummaryMessage = "CRITICAL: Vulnerability management gaps detected";
+                    suggestions.CriticalActions.AddRange(new[]
+                    {
+                        "URGENT: Scan for critical vulnerabilities immediately",
+                        "Prioritize patching of internet-facing systems",
+                        "Implement emergency patch procedures",
+                        "Consider taking vulnerable systems offline",
+                        "Establish incident response procedures"
+                    });
+                    break;
+            }
+            
+            suggestions.BestPractices.AddRange(new[]
+            {
+                "Monthly vulnerability scans at minimum",
+                "Risk-based vulnerability prioritization",
+                "Integration with patch management systems",
+                "Regular security awareness training"
+            });
+
+            return suggestions;
         }
 
         private void DisplayGeneratedReport(string report)
@@ -553,15 +1165,55 @@ namespace Gigahack_Admin123
                 // Store the assessment result for potential report generation
                 if (quizForm.CompletedAssessment != null)
                 {
-                    // Store the assessment for later use in reports
-                    // This could be added to the audit result or used separately
-                    MessageBox.Show("Assessment completed! Results are now available for report generation.", 
+                    currentAssessmentResult = quizForm.CompletedAssessment;
+                    MessageBox.Show($"Assessment completed! Grade: {currentAssessmentResult.SecurityGrade}, Score: {currentAssessmentResult.SecurityScore}. Results are now available for report generation.", 
                                   "Assessment Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Assessment was not completed properly. No data available for reports.", 
+                                  "Assessment Issue", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error opening assessment: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnClearResults_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Clear the results listbox
+                lstResults.Items.Clear();
+                
+                // Reset status
+                lblStatus.Text = "Ready";
+                
+                // Reset progress bar
+                progressBar.Value = 0;
+                
+                // Reset port counts
+                openPortsCount = 0;
+                closedPortsCount = 0;
+                UpdatePortCounts();
+                
+                // Reset overall score display
+                lblScoreValue.Text = "--";
+                lblScoreValue.ForeColor = System.Drawing.Color.Gray;
+                lblScoreStatus.Text = "No Scan Performed";
+                lblScoreStatus.ForeColor = System.Drawing.Color.Gray;
+                
+                // Clear current audit result
+                currentAuditResult = null;
+                
+                // Optional: Show confirmation
+                lblStatus.Text = "Results cleared";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error clearing results: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
