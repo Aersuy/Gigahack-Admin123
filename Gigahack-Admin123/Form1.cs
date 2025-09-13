@@ -28,6 +28,10 @@ namespace Gigahack_Admin123
         private int closedPortsCount = 0;
         private AuditResult? currentAuditResult;
         private LLM.DataClasses.AssessmentResult? currentAssessmentResult;
+        
+        // Workflow state tracking
+        private bool isAssessmentCompleted = false;
+        private bool isScanCompleted = false;
 
         public Form1()
         {
@@ -41,6 +45,9 @@ namespace Gigahack_Admin123
             
             // Initialize score display
             UpdateOverallScoreDisplay(0, Scans.Audit.DataClasses.ComplianceLevel.Red);
+            
+            // Initialize workflow state
+            UpdateWorkflowState();
             
             // Add cleanup on form close
             this.FormClosed += Form1_FormClosed;
@@ -98,6 +105,44 @@ namespace Gigahack_Admin123
 
         [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        private void UpdateWorkflowState()
+        {
+            // Update button states based on workflow progress
+            btnAuditDashboard.Enabled = isAssessmentCompleted;
+            btnGenerateReport.Enabled = isAssessmentCompleted && isScanCompleted;
+            
+            // Update button text to show workflow requirements
+            if (!isAssessmentCompleted)
+            {
+                btnAuditDashboard.Text = "🔒 Complete Assessment First";
+                btnGenerateReport.Text = "🔒 Complete Assessment & Scan";
+            }
+            else if (!isScanCompleted)
+            {
+                btnAuditDashboard.Text = "🔍 Run Security Audit";
+                btnGenerateReport.Text = "🔒 Complete Scan First";
+            }
+            else
+            {
+                btnAuditDashboard.Text = "🔍 Run Security Audit";
+                btnGenerateReport.Text = "📄 Generate Word Report";
+            }
+            
+            // Update status message to guide user
+            if (!isAssessmentCompleted)
+            {
+                lblStatus.Text = "Step 1: Complete IT Infrastructure Assessment to begin";
+            }
+            else if (!isScanCompleted)
+            {
+                lblStatus.Text = "Step 2: Run security audit to analyze your infrastructure";
+            }
+            else
+            {
+                lblStatus.Text = "Step 3: Generate comprehensive Word report with findings";
+            }
+        }
 
 
 
@@ -192,6 +237,14 @@ namespace Gigahack_Admin123
         // Audit Dashboard Methods
         private void btnAuditDashboard_Click(object sender, EventArgs e)
         {
+            // Check if assessment is completed first
+            if (!isAssessmentCompleted)
+            {
+                MessageBox.Show("Please complete the IT Infrastructure Assessment first before running the security audit.", 
+                              "Assessment Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            
             btnAuditDashboard.Enabled = false;
             lblStatus.Text = "Initializing security audit...";
             
@@ -255,6 +308,10 @@ namespace Gigahack_Admin123
                             progressBar.Value = 100;
                             DisplayAuditDashboardResults(result);
                             lblStatus.Text = "Security audit completed successfully";
+                            
+                            // Mark scan as completed
+                            isScanCompleted = true;
+                            UpdateWorkflowState();
                         }));
                         
                         // Keep progress bar full for a moment, then reset
@@ -262,19 +319,19 @@ namespace Gigahack_Admin123
                         this.Invoke(new Action(() => {
                             progressBar.Value = 0;
                             SetProgressBarColor(System.Drawing.Color.Gray); // Reset to default color
-                        }));
-                    }
-                    catch (Exception ex)
-                    {
+                }));
+            }
+            catch (Exception ex)
+            {
                         this.Invoke(new Action(() => {
                             progressBar.Value = 0;
                             SetProgressBarColor(System.Drawing.Color.Red); // Show red for error
                             MessageBox.Show($"Audit error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             lblStatus.Text = "Audit failed";
-                        }));
-                    }
-                    finally
-                    {
+                }));
+            }
+            finally
+            {
                     this.Invoke(new Action(() => {
                             btnAuditDashboard.Enabled = true;
                     }));
@@ -620,9 +677,18 @@ namespace Gigahack_Admin123
 
         private void btnGenerateReport_Click(object sender, EventArgs e)
         {
-            if (currentAuditResult == null)
+            // Check workflow prerequisites
+            if (!isAssessmentCompleted)
             {
-                MessageBox.Show("Please run a security audit first before generating a report.", "No Audit Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Please complete the IT Infrastructure Assessment first.", 
+                              "Assessment Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (!isScanCompleted || currentAuditResult == null)
+            {
+                MessageBox.Show("Please run a security audit first before generating a report.", 
+                              "Scan Required", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -640,20 +706,20 @@ namespace Gigahack_Admin123
                         // Generate report using LLM
                         var report = await llmCommunicate.GenerateReport(reportData);
 
-                        this.Invoke(new Action(() => {
+                    this.Invoke(new Action(() => {
                             DisplayGeneratedReport(report);
                             lblStatus.Text = "Word report generated successfully";
-                        }));
-                    }
-                    catch (Exception ex)
-                    {
+                    }));
+            }
+            catch (Exception ex)
+            {
                         this.Invoke(new Action(() => {
                             MessageBox.Show($"Report generation error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             lblStatus.Text = "Word report generation failed";
                         }));
-                    }
-                    finally
-                    {
+            }
+            finally
+            {
                     this.Invoke(new Action(() => {
                             btnGenerateReport.Enabled = true;
                     }));
@@ -1129,9 +1195,9 @@ namespace Gigahack_Admin123
                         paragraph.ParagraphProperties = new ParagraphProperties(
                             new SpacingBetweenLines() { Before = "200", After = "100" }
                         );
-                    }
-                    else
-                    {
+            }
+            else
+            {
                         // Format as regular text
                         run.AppendChild(new Text(section));
                         paragraph.ParagraphProperties = new ParagraphProperties(
@@ -1166,12 +1232,15 @@ namespace Gigahack_Admin123
                 if (quizForm.CompletedAssessment != null)
                 {
                     currentAssessmentResult = quizForm.CompletedAssessment;
-                    MessageBox.Show($"Assessment completed! Grade: {currentAssessmentResult.SecurityGrade}, Score: {currentAssessmentResult.SecurityScore}. Results are now available for report generation.", 
-                                  "Assessment Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    isAssessmentCompleted = true;
+                    UpdateWorkflowState();
+                    
+                    MessageBox.Show($"Assessment completed! Grade: {currentAssessmentResult.SecurityGrade}, Score: {currentAssessmentResult.SecurityScore}.\n\nYou can now proceed to run the security audit.", 
+                                  "Assessment Complete - Next Step Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show("Assessment was not completed properly. No data available for reports.", 
+                    MessageBox.Show("Assessment was not completed properly. Please try again.", 
                                   "Assessment Issue", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
@@ -1185,6 +1254,21 @@ namespace Gigahack_Admin123
         {
             try
             {
+                // Ask user if they want to reset the entire workflow or just clear scan results
+                var result = MessageBox.Show(
+                    "Choose what to clear:\n\n" +
+                    "• Click 'Yes' to clear only scan results (keep assessment data)\n" +
+                    "• Click 'No' to reset entire workflow (clear assessment + scan data)\n" +
+                    "• Click 'Cancel' to keep everything",
+                    "Clear Options", 
+                    MessageBoxButtons.YesNoCancel, 
+                    MessageBoxIcon.Question);
+                
+                if (result == DialogResult.Cancel)
+                {
+                    return;
+                }
+                
                 // Clear the results listbox
                 lstResults.Items.Clear();
                 
@@ -1193,6 +1277,7 @@ namespace Gigahack_Admin123
                 
                 // Reset progress bar
                 progressBar.Value = 0;
+                SetProgressBarColor(System.Drawing.Color.Gray);
                 
                 // Reset port counts
                 openPortsCount = 0;
@@ -1207,9 +1292,22 @@ namespace Gigahack_Admin123
                 
                 // Clear current audit result
                 currentAuditResult = null;
+                isScanCompleted = false;
                 
-                // Optional: Show confirmation
-                lblStatus.Text = "Results cleared";
+                if (result == DialogResult.No)
+                {
+                    // Reset entire workflow
+                    currentAssessmentResult = null;
+                    isAssessmentCompleted = false;
+                    lblStatus.Text = "Workflow reset - start with IT Infrastructure Assessment";
+                }
+                else
+                {
+                    // Keep assessment, just clear scan results
+                    lblStatus.Text = "Scan results cleared - assessment data preserved";
+                }
+                
+                UpdateWorkflowState();
             }
             catch (Exception ex)
             {
