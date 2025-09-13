@@ -13,9 +13,12 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                if (components != null)
+                {
+                    components.Dispose();
+                }
             }
             base.Dispose(disposing);
         }
@@ -35,6 +38,8 @@
             this.btnScanLocalhost = new Button();
             this.btnScanCommon = new Button();
             this.btnEmailAuth = new Button();
+            this.btnCVE = new Button();
+            this.btnPasswordPolicy = new Button();
             this.btnStop = new Button();
             this.progressBar = new ProgressBar();
             this.lblStatus = new Label();
@@ -132,10 +137,30 @@
             this.btnEmailAuth.UseVisualStyleBackColor = true;
             this.btnEmailAuth.Click += new EventHandler(this.btnEmailAuth_Click);
             // 
+            // btnCVE
+            // 
+            this.btnCVE.Location = new Point(411, 85);
+            this.btnCVE.Name = "btnCVE";
+            this.btnCVE.Size = new Size(100, 30);
+            this.btnCVE.TabIndex = 9;
+            this.btnCVE.Text = "Search CVEs";
+            this.btnCVE.UseVisualStyleBackColor = true;
+            this.btnCVE.Click += new EventHandler(this.btnCVE_Click);
+            // 
+            // btnPasswordPolicy
+            // 
+            this.btnPasswordPolicy.Location = new Point(517, 85);
+            this.btnPasswordPolicy.Name = "btnPasswordPolicy";
+            this.btnPasswordPolicy.Size = new Size(100, 30);
+            this.btnPasswordPolicy.TabIndex = 10;
+            this.btnPasswordPolicy.Text = "Password Policy";
+            this.btnPasswordPolicy.UseVisualStyleBackColor = true;
+            this.btnPasswordPolicy.Click += new EventHandler(this.btnPasswordPolicy_Click);
+            // 
             // btnStop
             // 
             this.btnStop.Enabled = false;
-            this.btnStop.Location = new Point(411, 85);
+            this.btnStop.Location = new Point(623, 85);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new Size(75, 30);
             this.btnStop.TabIndex = 9;
@@ -209,6 +234,8 @@
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnStop);
+            this.Controls.Add(this.btnPasswordPolicy);
+            this.Controls.Add(this.btnCVE);
             this.Controls.Add(this.btnEmailAuth);
             this.Controls.Add(this.btnScanCommon);
             this.Controls.Add(this.btnScanLocalhost);
@@ -233,6 +260,8 @@
         private Button btnScanLocalhost;
         private Button btnScanCommon;
         private Button btnEmailAuth;
+        private Button btnCVE;
+        private Button btnPasswordPolicy;
         private Button btnStop;
         private ProgressBar progressBar;
         private Label lblStatus;

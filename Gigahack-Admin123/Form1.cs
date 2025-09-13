@@ -1,5 +1,9 @@
 using Scans.InternetExposure.ScanLogic;
 using Scans.InternetExposure.DataClases;
+using Scans.CVE.ScanLogic;
+using Scans.CVE.DataClasses;
+using Scans.Password.PasswordLogic;
+using Scans.Password.DataClasses;
 using System.Net;
 
 namespace Gigahack_Admin123
@@ -8,6 +12,8 @@ namespace Gigahack_Admin123
     {
         private PortScanner portScanner;
         private EmailAuthScanner emailAuthScanner;
+        private CVEScanner cveScanner;
+        private PasswordChangeScan passwordPolicyScanner;
         private CancellationTokenSource? cancellationTokenSource;
         private int openPortsCount = 0;
         private int closedPortsCount = 0;
@@ -17,6 +23,16 @@ namespace Gigahack_Admin123
             InitializeComponent();
             portScanner = new PortScanner();
             emailAuthScanner = new EmailAuthScanner();
+            cveScanner = new CVEScanner();
+            passwordPolicyScanner = new PasswordChangeScan();
+            
+            // Add cleanup on form close
+            this.FormClosed += Form1_FormClosed;
+        }
+
+        private void Form1_FormClosed(object? sender, FormClosedEventArgs e)
+        {
+            cveScanner?.Dispose();
         }
 
         private void btnScan_Click(object sender, EventArgs e)
@@ -378,5 +394,367 @@ namespace Gigahack_Admin123
                 }
             }
         }
+
+        // CVE Search Methods
+        private void btnCVE_Click(object sender, EventArgs e)
+        {
+            if (lstResults.Items.Count == 0)
+            {
+                MessageBox.Show("Please run a port scan first to search for CVEs based on discovered services.", "No Scan Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            btnCVE.Enabled = false;
+            lblStatus.Text = "Searching for CVEs...";
+
+            try
+            {
+                // Run on background thread to prevent UI freezing
+                Task.Run(async () => {
+                    try
+                    {
+                        // First test the APIs
+                        await cveScanner.TestAPIs();
+                        
+                        // Get the port scan results from the current display
+                        var portResults = GetPortScanResultsFromDisplay();
+                        var result = await cveScanner.SearchCVEsForPortScanResults(portResults);
+                        
+                        // Update UI on main thread
+                        this.Invoke(new Action(() => {
+                            DisplayCVEResults(result);
+                            lblStatus.Text = "CVE search completed";
+                        }));
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Invoke(new Action(() => {
+                            MessageBox.Show($"CVE search error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            lblStatus.Text = "CVE search failed";
+                        }));
+                    }
+                    finally
+                    {
+                        this.Invoke(new Action(() => {
+                            btnCVE.Enabled = true;
+                        }));
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"CVE search error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblStatus.Text = "CVE search failed";
+                btnCVE.Enabled = true;
+            }
+        }
+
+        private List<PortScanResult> GetPortScanResultsFromDisplay()
+        {
+            var portItems = new List<PortScanItem>();
+            
+            foreach (var item in lstResults.Items)
+            {
+                var itemText = item.ToString();
+                if (itemText != null && itemText.Contains(" - OPEN"))
+                {
+                    // Parse the displayed port information
+                    // Format: "Port 80 (http) - OPEN - Apache/2.4.41"
+                    var parts = itemText.Split(" - ");
+                    if (parts.Length >= 2)
+                    {
+                        var portPart = parts[0]; // "Port 80 (http)"
+                        var statusPart = parts[1]; // "OPEN"
+                        
+                        if (statusPart == "OPEN")
+                        {
+                            // Extract port number and service
+                            var portMatch = System.Text.RegularExpressions.Regex.Match(portPart, @"Port (\d+) \((.+)\)");
+                            if (portMatch.Success)
+                            {
+                                var portNumber = int.Parse(portMatch.Groups[1].Value);
+                                var service = portMatch.Groups[2].Value;
+                                
+                                // Extract banner if available
+                                var banner = parts.Length > 2 ? string.Join(" - ", parts.Skip(2)) : "";
+                                
+                                portItems.Add(new PortScanItem
+                                {
+                                    portNumber = portNumber,
+                                    service = service,
+                                    banner = banner,
+                                    open = true
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Create a single PortScanResult containing all the port items
+            return new List<PortScanResult> 
+            { 
+                new PortScanResult 
+                { 
+                    Ports = portItems 
+                } 
+            };
+        }
+
+        private void DisplayCVEResults(CVESearchResult result)
+        {
+            lstResults.Items.Clear();
+            
+            lstResults.Items.Add($"=== CVE Search Results ===");
+            lstResults.Items.Add($"Search Query: {result.SearchQuery}");
+            lstResults.Items.Add($"Total CVEs Found: {result.TotalResults}");
+            lstResults.Items.Add($"Search Time: {result.SearchTime:yyyy-MM-dd HH:mm:ss}");
+            lstResults.Items.Add("");
+
+            if (!result.Success)
+            {
+                lstResults.Items.Add($"❌ Error: {result.ErrorMessage}");
+                return;
+            }
+
+            if (result.CVEs.Count == 0)
+            {
+                lstResults.Items.Add("✅ No CVEs found for the discovered services.");
+                return;
+            }
+
+            // Group CVEs by severity
+            var criticalCVEs = result.CVEs.Where(c => c.Severity?.ToLower() == "critical").ToList();
+            var highCVEs = result.CVEs.Where(c => c.Severity?.ToLower() == "high").ToList();
+            var mediumCVEs = result.CVEs.Where(c => c.Severity?.ToLower() == "medium").ToList();
+            var lowCVEs = result.CVEs.Where(c => c.Severity?.ToLower() == "low").ToList();
+            var otherCVEs = result.CVEs.Where(c => !new[] { "critical", "high", "medium", "low" }.Contains(c.Severity?.ToLower())).ToList();
+
+            // Display summary
+            lstResults.Items.Add("=== Summary ===");
+            if (criticalCVEs.Any()) lstResults.Items.Add($"🔴 Critical: {criticalCVEs.Count}");
+            if (highCVEs.Any()) lstResults.Items.Add($"🟠 High: {highCVEs.Count}");
+            if (mediumCVEs.Any()) lstResults.Items.Add($"🟡 Medium: {mediumCVEs.Count}");
+            if (lowCVEs.Any()) lstResults.Items.Add($"🟢 Low: {lowCVEs.Count}");
+            if (otherCVEs.Any()) lstResults.Items.Add($"⚪ Other: {otherCVEs.Count}");
+            lstResults.Items.Add("");
+
+            // Display CVEs by severity
+            DisplayCVESeverityGroup("Critical", criticalCVEs, "🔴");
+            DisplayCVESeverityGroup("High", highCVEs, "🟠");
+            DisplayCVESeverityGroup("Medium", mediumCVEs, "🟡");
+            DisplayCVESeverityGroup("Low", lowCVEs, "🟢");
+            DisplayCVESeverityGroup("Other", otherCVEs, "⚪");
+        }
+
+        private void DisplayCVESeverityGroup(string severity, List<CVEResult> cves, string emoji)
+        {
+            if (!cves.Any()) return;
+
+            lstResults.Items.Add($"=== {severity} Severity CVEs ===");
+            
+            foreach (var cve in cves.Take(10)) // Limit to top 10 per severity
+            {
+                lstResults.Items.Add($"{emoji} {cve.CVEId}");
+                lstResults.Items.Add($"   Score: {cve.CVSSScore:F1} | Severity: {cve.Severity}");
+                lstResults.Items.Add($"   Published: {cve.PublishedDate:yyyy-MM-dd}");
+                
+                // Truncate description for display
+                var description = cve.Description.Length > 100 ? 
+                    cve.Description.Substring(0, 100) + "..." : 
+                    cve.Description;
+                lstResults.Items.Add($"   Description: {description}");
+                
+                if (cve.AffectedProducts.Any())
+                {
+                    lstResults.Items.Add($"   Affected: {string.Join(", ", cve.AffectedProducts.Take(3))}");
+                }
+                
+                if (cve.References.Any())
+                {
+                    lstResults.Items.Add($"   References: {cve.References.First()}");
+                }
+                
+                lstResults.Items.Add("");
+            }
+
+            if (cves.Count > 10)
+            {
+                lstResults.Items.Add($"   ... and {cves.Count - 10} more {severity.ToLower()} severity CVEs");
+                lstResults.Items.Add("");
+            }
+        }
+
+        // Password Policy Methods
+        private void btnPasswordPolicy_Click(object sender, EventArgs e)
+        {
+            btnPasswordPolicy.Enabled = false;
+            lblStatus.Text = "Scanning password policies...";
+
+            try
+            {
+                // Run on background thread to prevent UI freezing
+                Task.Run(async () => {
+                    try
+                    {
+                        // Use the target IP as domain controller if provided, otherwise scan local machine
+                        var domainController = !string.IsNullOrEmpty(txtTargetIP.Text) && txtTargetIP.Text != "127.0.0.1" ? txtTargetIP.Text : null;
+                        var result = await passwordPolicyScanner.ScanPasswordPolicies(domainController);
+                        
+                        // Update UI on main thread
+                        this.Invoke(new Action(() => {
+                            DisplayPasswordPolicyResults(result);
+                            lblStatus.Text = "Password policy scan completed";
+                        }));
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Invoke(new Action(() => {
+                            MessageBox.Show($"Password policy scan error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            lblStatus.Text = "Password policy scan failed";
+                        }));
+                    }
+                    finally
+                    {
+                        this.Invoke(new Action(() => {
+                            btnPasswordPolicy.Enabled = true;
+                        }));
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Password policy scan error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                lblStatus.Text = "Password policy scan failed";
+                btnPasswordPolicy.Enabled = true;
+            }
+        }
+
+        private void DisplayPasswordPolicyResults(PasswordPolicyResult result)
+        {
+            lstResults.Items.Clear();
+            
+            lstResults.Items.Add($"=== Password Policy Security Report ===");
+            lstResults.Items.Add($"Target: {result.Target}");
+            lstResults.Items.Add($"Security Score: {result.SecurityScore}/100 (Grade: {result.SecurityGrade})");
+            lstResults.Items.Add($"Scan Time: {result.ScanTime:yyyy-MM-dd HH:mm:ss}");
+            lstResults.Items.Add("");
+
+            if (!result.Success)
+            {
+                lstResults.Items.Add($"❌ Error: {result.ErrorMessage}");
+                return;
+            }
+
+            // Password Complexity
+            lstResults.Items.Add("=== Password Complexity ===");
+            lstResults.Items.Add($"Enabled: {result.Complexity.Enabled}");
+            if (result.Complexity.Enabled)
+            {
+                lstResults.Items.Add($"Minimum Length: {result.Complexity.MinimumLength} characters");
+                lstResults.Items.Add($"Require Uppercase: {result.Complexity.RequireUppercase}");
+                lstResults.Items.Add($"Require Lowercase: {result.Complexity.RequireLowercase}");
+                lstResults.Items.Add($"Require Numbers: {result.Complexity.RequireNumbers}");
+                lstResults.Items.Add($"Require Special Characters: {result.Complexity.RequireSpecialCharacters}");
+                lstResults.Items.Add($"Minimum Character Sets: {result.Complexity.MinimumCharacterSets}");
+            }
+            else
+            {
+                lstResults.Items.Add("❌ Password complexity is disabled");
+            }
+            lstResults.Items.Add("");
+
+            // Password History
+            lstResults.Items.Add("=== Password History ===");
+            lstResults.Items.Add($"Enabled: {result.History.Enabled}");
+            if (result.History.Enabled)
+            {
+                lstResults.Items.Add($"Remembered Passwords: {result.History.RememberedPasswords}");
+                lstResults.Items.Add($"Enforced: {result.History.Enforced}");
+            }
+            else
+            {
+                lstResults.Items.Add("❌ Password history is disabled");
+            }
+            lstResults.Items.Add("");
+
+            // Password Age
+            lstResults.Items.Add("=== Password Age Policy ===");
+            lstResults.Items.Add($"Enabled: {result.Age.Enabled}");
+            if (result.Age.Enabled)
+            {
+                lstResults.Items.Add($"Maximum Age: {result.Age.MaximumAge} days");
+                lstResults.Items.Add($"Minimum Age: {result.Age.MinimumAge} days");
+                lstResults.Items.Add($"Enforced: {result.Age.Enforced}");
+            }
+            else
+            {
+                lstResults.Items.Add("❌ Password age policy is disabled");
+            }
+            lstResults.Items.Add("");
+
+            // Account Lockout
+            lstResults.Items.Add("=== Account Lockout Policy ===");
+            lstResults.Items.Add($"Enabled: {result.Lockout.Enabled}");
+            if (result.Lockout.Enabled)
+            {
+                lstResults.Items.Add($"Lockout Threshold: {result.Lockout.LockoutThreshold} attempts");
+                lstResults.Items.Add($"Lockout Duration: {result.Lockout.LockoutDuration} minutes");
+                lstResults.Items.Add($"Reset Count After: {result.Lockout.ResetCountAfter} minutes");
+                lstResults.Items.Add($"Enforced: {result.Lockout.Enforced}");
+            }
+            else
+            {
+                lstResults.Items.Add("❌ Account lockout policy is disabled");
+            }
+            lstResults.Items.Add("");
+
+            // Password Change Frequency
+            lstResults.Items.Add("=== Password Change Frequency ===");
+            lstResults.Items.Add($"Enabled: {result.ChangeFrequency.Enabled}");
+            if (result.ChangeFrequency.Enabled)
+            {
+                lstResults.Items.Add($"Minimum Days Between Changes: {result.ChangeFrequency.MinimumDaysBetweenChanges}");
+                lstResults.Items.Add($"Enforced: {result.ChangeFrequency.Enforced}");
+            }
+            else
+            {
+                lstResults.Items.Add("❌ Password change frequency policy is disabled");
+            }
+            lstResults.Items.Add("");
+
+            // Recommendations
+            if (result.Recommendations.Any())
+            {
+                lstResults.Items.Add("=== Security Recommendations ===");
+                foreach (var recommendation in result.Recommendations)
+                {
+                    lstResults.Items.Add($"💡 {recommendation}");
+                }
+                lstResults.Items.Add("");
+            }
+
+            // Warnings
+            if (result.Warnings.Any())
+            {
+                lstResults.Items.Add("=== Warnings ===");
+                foreach (var warning in result.Warnings)
+                {
+                    lstResults.Items.Add($"⚠️ {warning}");
+                }
+                lstResults.Items.Add("");
+            }
+
+            // Errors
+            if (result.Errors.Any())
+            {
+                lstResults.Items.Add("=== Errors ===");
+                foreach (var error in result.Errors)
+                {
+                    lstResults.Items.Add($"❌ {error}");
+                }
+            }
+        }
+
     }
 }
