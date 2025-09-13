@@ -24,8 +24,6 @@ namespace Gigahack_Admin123
         private AuditScanner auditScanner;
         private Communicate llmCommunicate;
         private CancellationTokenSource? cancellationTokenSource;
-        private int openPortsCount = 0;
-        private int closedPortsCount = 0;
         private AuditResult? currentAuditResult;
         private LLM.DataClasses.AssessmentResult? currentAssessmentResult;
         
@@ -70,11 +68,6 @@ namespace Gigahack_Admin123
             // Note: You'll need to add cancellation logic to your AllPortScan method for this to work properly
         }
 
-        private void UpdatePortCounts()
-        {
-            lblOpenPorts.Text = $"Open: {openPortsCount}";
-            lblClosedPorts.Text = $"Closed: {closedPortsCount}";
-        }
 
         private void SetProgressBarColor(System.Drawing.Color color)
         {
@@ -1279,10 +1272,6 @@ namespace Gigahack_Admin123
                 progressBar.Value = 0;
                 SetProgressBarColor(System.Drawing.Color.Gray);
                 
-                // Reset port counts
-                openPortsCount = 0;
-                closedPortsCount = 0;
-                UpdatePortCounts();
                 
                 // Reset overall score display
                 lblScoreValue.Text = "--";

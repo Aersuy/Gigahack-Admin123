@@ -46,8 +46,6 @@
             this.lblStatus = new Label();
             this.lstResults = new ListBox();
             this.lblResults = new Label();
-            this.lblOpenPorts = new Label();
-            this.lblClosedPorts = new Label();
             this.lblOverallScore = new Label();
             this.lblScoreValue = new Label();
             this.lblScoreStatus = new Label();
@@ -209,24 +207,6 @@
             this.lblResults.TabIndex = 9;
             this.lblResults.Text = "Results:";
             
-            // Port Status Labels
-            this.lblOpenPorts.AutoSize = true;
-            this.lblOpenPorts.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblOpenPorts.ForeColor = Color.FromArgb(16, 137, 62);
-            this.lblOpenPorts.Location = new Point(600, 222);
-            this.lblOpenPorts.Name = "lblOpenPorts";
-            this.lblOpenPorts.Size = new Size(65, 19);
-            this.lblOpenPorts.TabIndex = 10;
-            this.lblOpenPorts.Text = "Open: 0";
-            
-            this.lblClosedPorts.AutoSize = true;
-            this.lblClosedPorts.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblClosedPorts.ForeColor = Color.FromArgb(196, 43, 28);
-            this.lblClosedPorts.Location = new Point(680, 222);
-            this.lblClosedPorts.Name = "lblClosedPorts";
-            this.lblClosedPorts.Size = new Size(75, 19);
-            this.lblClosedPorts.TabIndex = 11;
-            this.lblClosedPorts.Text = "Closed: 0";
             
             // lstResults
             this.lstResults.BackColor = Color.FromArgb(250, 250, 250);
@@ -312,8 +292,6 @@
                 
                 // Results Section
                 this.lblResults,
-                this.lblOpenPorts,
-                this.lblClosedPorts,
                 this.lstResults,
                 
                 // Score Section
@@ -340,8 +318,6 @@
         private Label lblStatus;
         private ListBox lstResults;
         private Label lblResults;
-        private Label lblOpenPorts;
-        private Label lblClosedPorts;
         private Label lblOverallScore;
         private Label lblScoreValue;
         private Label lblScoreStatus;
