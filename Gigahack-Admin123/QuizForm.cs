@@ -62,10 +62,12 @@ namespace Gigahack_Admin123
                     var radioButton = new RadioButton
                     {
                         Text = question.Options[i],
-                        Location = new Point(10, 10 + (i * 30)),
-                        Size = new Size(400, 25),
+                        Location = new Point(15, 15 + (i * 60)),
+                        Size = new Size(500, 50),
                         Tag = i,
-                        Font = new Font("Segoe UI", 10)
+                        Font = new Font("Segoe UI", 11),
+                        AutoSize = false,
+                        TextAlign = ContentAlignment.MiddleLeft
                     };
                     panelOptions.Controls.Add(radioButton);
                 }

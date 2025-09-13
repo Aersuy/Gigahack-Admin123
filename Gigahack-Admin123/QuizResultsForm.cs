@@ -42,15 +42,13 @@ namespace Gigahack_Admin123
             
             lblGrade.Text = $"Assessment: {securityLevel}";
             
-            // Set color based on security level
-            var gradeColor = securityLevel switch
+            // Set color based on security level (Green-Yellow-Red scheme)
+            var gradeColor = quizResult.Session.PercentageScore switch
             {
-                "Excellent" => Color.Green,
-                "Good" => Color.Blue,
-                "Fair" => Color.Orange,
-                "Poor" => Color.OrangeRed,
-                "Critical" => Color.Red,
-                _ => Color.Black
+                >= 75 => Color.Green,        // Green for good scores (75%+)
+                >= 50 => Color.Orange,       // Yellow/Orange for medium scores (50-74%)
+                >= 25 => Color.Red,          // Red for poor scores (25-49%)
+                _ => Color.DarkRed           // Dark red for critical scores (<25%)
             };
             
             lblScore.ForeColor = gradeColor;
@@ -75,11 +73,11 @@ namespace Gigahack_Admin123
                     var selectedOption = answer.SelectedAnswerIndex < question.Options.Count ? 
                         question.Options[answer.SelectedAnswerIndex] : "No answer provided";
                     
-                    // Calculate security score for this answer
+                    // Calculate security score for this answer (Green-Yellow-Red scheme)
                     var securityScore = answer.SelectedAnswerIndex switch
                     {
                         0 => "🟢 Excellent Security",
-                        1 => "🔵 Good Security", 
+                        1 => "🟢 Good Security", 
                         2 => "🟡 Basic Security",
                         3 => "🔴 Poor Security",
                         _ => "❌ No Response"
