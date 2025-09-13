@@ -8,10 +8,12 @@ using System.Threading.Tasks;
 using Microsoft.Win32;
 using System.Security.Principal;
 using System.Management;
+using System.Runtime.Versioning;
 using Scans.Password.DataClasses;
 
 namespace Scans.Password.PasswordLogic
 {
+    [SupportedOSPlatform("windows")]
     public class PasswordChangeScan
     {
         public async Task<PasswordPolicyResult> ScanPasswordPolicies(string domainController = null)
@@ -133,6 +135,7 @@ namespace Scans.Password.PasswordLogic
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private bool IsRunningAsAdministrator()
         {
             try
@@ -147,6 +150,7 @@ namespace Scans.Password.PasswordLogic
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private void ScanPasswordComplexityPolicies(PasswordPolicyResult result)
         {
             try
@@ -237,6 +241,7 @@ namespace Scans.Password.PasswordLogic
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private void ScanPasswordHistoryPolicies(PasswordPolicyResult result)
         {
             try
@@ -288,6 +293,7 @@ namespace Scans.Password.PasswordLogic
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private void ScanPasswordAgePolicies(PasswordPolicyResult result)
         {
             try
@@ -353,6 +359,7 @@ namespace Scans.Password.PasswordLogic
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private void ScanAccountLockoutPolicies(PasswordPolicyResult result)
         {
             try
@@ -430,6 +437,7 @@ namespace Scans.Password.PasswordLogic
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private void ScanPasswordChangeFrequencyPolicies(PasswordPolicyResult result)
         {
             try
@@ -492,6 +500,7 @@ namespace Scans.Password.PasswordLogic
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private void CheckWindowsSecurityFeatures(PasswordPolicyResult result)
         {
             try

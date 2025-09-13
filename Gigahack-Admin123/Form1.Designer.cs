@@ -34,12 +34,7 @@
             this.lblTitle = new Label();
             this.lblTargetIP = new Label();
             this.txtTargetIP = new TextBox();
-            this.btnScan = new Button();
-            this.btnScanLocalhost = new Button();
-            this.btnScanCommon = new Button();
-            this.btnEmailAuth = new Button();
-            this.btnCVE = new Button();
-            this.btnPasswordPolicy = new Button();
+            this.btnAuditDashboard = new Button();
             this.btnStop = new Button();
             this.progressBar = new ProgressBar();
             this.lblStatus = new Label();
@@ -47,8 +42,6 @@
             this.lblResults = new Label();
             this.lblOpenPorts = new Label();
             this.lblClosedPorts = new Label();
-            this.numMaxPorts = new NumericUpDown();
-            this.lblMaxPorts = new Label();
             this.SuspendLayout();
             // 
             // lblTitle
@@ -57,18 +50,18 @@
             this.lblTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
             this.lblTitle.Location = new Point(12, 9);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new Size(200, 30);
+            this.lblTitle.Size = new Size(300, 30);
             this.lblTitle.TabIndex = 0;
-            this.lblTitle.Text = "Gigahack Port Scanner";
+            this.lblTitle.Text = "🔍 Security Audit Dashboard";
             // 
             // lblTargetIP
             // 
             this.lblTargetIP.AutoSize = true;
             this.lblTargetIP.Location = new Point(12, 50);
             this.lblTargetIP.Name = "lblTargetIP";
-            this.lblTargetIP.Size = new Size(58, 15);
+            this.lblTargetIP.Size = new Size(100, 15);
             this.lblTargetIP.TabIndex = 1;
-            this.lblTargetIP.Text = "Target IP:";
+            this.lblTargetIP.Text = "Target IP/Domain:";
             // 
             // txtTargetIP
             // 
@@ -78,89 +71,20 @@
             this.txtTargetIP.TabIndex = 2;
             this.txtTargetIP.Text = "127.0.0.1";
             // 
-            // lblMaxPorts
+            // btnAuditDashboard
             // 
-            this.lblMaxPorts.AutoSize = true;
-            this.lblMaxPorts.Location = new Point(250, 50);
-            this.lblMaxPorts.Name = "lblMaxPorts";
-            this.lblMaxPorts.Size = new Size(70, 15);
-            this.lblMaxPorts.TabIndex = 3;
-            this.lblMaxPorts.Text = "Max Ports:";
-            // 
-            // numMaxPorts
-            // 
-            this.numMaxPorts.Location = new Point(326, 47);
-            this.numMaxPorts.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
-            this.numMaxPorts.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
-            this.numMaxPorts.Name = "numMaxPorts";
-            this.numMaxPorts.Size = new Size(80, 23);
-            this.numMaxPorts.TabIndex = 4;
-            this.numMaxPorts.Value = new decimal(new int[] { 500, 0, 0, 0 });
-            // 
-            // btnScan
-            // 
-            this.btnScan.Location = new Point(12, 85);
-            this.btnScan.Name = "btnScan";
-            this.btnScan.Size = new Size(75, 30);
-            this.btnScan.TabIndex = 5;
-            this.btnScan.Text = "Start Scan";
-            this.btnScan.UseVisualStyleBackColor = true;
-            this.btnScan.Click += new EventHandler(this.btnScan_Click);
-            // 
-            // btnScanLocalhost
-            // 
-            this.btnScanLocalhost.Location = new Point(93, 85);
-            this.btnScanLocalhost.Name = "btnScanLocalhost";
-            this.btnScanLocalhost.Size = new Size(100, 30);
-            this.btnScanLocalhost.TabIndex = 6;
-            this.btnScanLocalhost.Text = "Scan Localhost";
-            this.btnScanLocalhost.UseVisualStyleBackColor = true;
-            this.btnScanLocalhost.Click += new EventHandler(this.btnScanLocalhost_Click);
-            // 
-            // btnScanCommon
-            // 
-            this.btnScanCommon.Location = new Point(199, 85);
-            this.btnScanCommon.Name = "btnScanCommon";
-            this.btnScanCommon.Size = new Size(100, 30);
-            this.btnScanCommon.TabIndex = 7;
-            this.btnScanCommon.Text = "Scan Common";
-            this.btnScanCommon.UseVisualStyleBackColor = true;
-            this.btnScanCommon.Click += new EventHandler(this.btnScanCommon_Click);
-            // 
-            // btnEmailAuth
-            // 
-            this.btnEmailAuth.Location = new Point(305, 85);
-            this.btnEmailAuth.Name = "btnEmailAuth";
-            this.btnEmailAuth.Size = new Size(100, 30);
-            this.btnEmailAuth.TabIndex = 8;
-            this.btnEmailAuth.Text = "Email Auth";
-            this.btnEmailAuth.UseVisualStyleBackColor = true;
-            this.btnEmailAuth.Click += new EventHandler(this.btnEmailAuth_Click);
-            // 
-            // btnCVE
-            // 
-            this.btnCVE.Location = new Point(411, 85);
-            this.btnCVE.Name = "btnCVE";
-            this.btnCVE.Size = new Size(100, 30);
-            this.btnCVE.TabIndex = 9;
-            this.btnCVE.Text = "Search CVEs";
-            this.btnCVE.UseVisualStyleBackColor = true;
-            this.btnCVE.Click += new EventHandler(this.btnCVE_Click);
-            // 
-            // btnPasswordPolicy
-            // 
-            this.btnPasswordPolicy.Location = new Point(517, 85);
-            this.btnPasswordPolicy.Name = "btnPasswordPolicy";
-            this.btnPasswordPolicy.Size = new Size(100, 30);
-            this.btnPasswordPolicy.TabIndex = 10;
-            this.btnPasswordPolicy.Text = "Password Policy";
-            this.btnPasswordPolicy.UseVisualStyleBackColor = true;
-            this.btnPasswordPolicy.Click += new EventHandler(this.btnPasswordPolicy_Click);
+            this.btnAuditDashboard.Location = new Point(12, 85);
+            this.btnAuditDashboard.Name = "btnAuditDashboard";
+            this.btnAuditDashboard.Size = new Size(200, 50);
+            this.btnAuditDashboard.TabIndex = 5;
+            this.btnAuditDashboard.Text = "🔍 Run Security Audit";
+            this.btnAuditDashboard.UseVisualStyleBackColor = true;
+            this.btnAuditDashboard.Click += new EventHandler(this.btnAuditDashboard_Click);
             // 
             // btnStop
             // 
             this.btnStop.Enabled = false;
-            this.btnStop.Location = new Point(623, 85);
+            this.btnStop.Location = new Point(220, 85);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new Size(75, 30);
             this.btnStop.TabIndex = 9;
@@ -234,19 +158,12 @@
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnStop);
-            this.Controls.Add(this.btnPasswordPolicy);
-            this.Controls.Add(this.btnCVE);
-            this.Controls.Add(this.btnEmailAuth);
-            this.Controls.Add(this.btnScanCommon);
-            this.Controls.Add(this.btnScanLocalhost);
-            this.Controls.Add(this.btnScan);
-            this.Controls.Add(this.numMaxPorts);
-            this.Controls.Add(this.lblMaxPorts);
+            this.Controls.Add(this.btnAuditDashboard);
             this.Controls.Add(this.txtTargetIP);
             this.Controls.Add(this.lblTargetIP);
             this.Controls.Add(this.lblTitle);
             this.Name = "Form1";
-            this.Text = "Gigahack Port Scanner";
+            this.Text = "Security Audit Dashboard";
             this.ResumeLayout(false);
             this.PerformLayout();
         }
@@ -256,12 +173,7 @@
         private Label lblTitle;
         private Label lblTargetIP;
         private TextBox txtTargetIP;
-        private Button btnScan;
-        private Button btnScanLocalhost;
-        private Button btnScanCommon;
-        private Button btnEmailAuth;
-        private Button btnCVE;
-        private Button btnPasswordPolicy;
+        private Button btnAuditDashboard;
         private Button btnStop;
         private ProgressBar progressBar;
         private Label lblStatus;
@@ -269,7 +181,5 @@
         private Label lblResults;
         private Label lblOpenPorts;
         private Label lblClosedPorts;
-        private NumericUpDown numMaxPorts;
-        private Label lblMaxPorts;
     }
 }
