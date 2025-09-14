@@ -1,4 +1,4 @@
-# Gigahack Port Scanner
+# CompliScan™
 
 A Windows Forms application for network port scanning built with C# and .NET 8.
 
