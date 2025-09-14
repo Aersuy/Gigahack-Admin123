@@ -29,6 +29,9 @@ namespace Gigahack_Admin123
             // Check for incident-related answers and show warning if needed
             CheckForIncidentWarning();
             
+            // Check for poor quiz scores and show training recommendations
+            CheckForTrainingRecommendations();
+            
             // Display overall security score
             var maxScore = quizResult.Session.TotalQuestions * 4;
             lblScore.Text = $"Security Score: {quizResult.Session.Score}/{maxScore}";
@@ -190,6 +193,52 @@ namespace Gigahack_Admin123
                           "Incident Reporting Requirements", 
                           MessageBoxButtons.OK, 
                           MessageBoxIcon.Warning);
+        }
+
+        private void CheckForTrainingRecommendations()
+        {
+            // Show training recommendations if score is below 50% (Poor or Critical)
+            if (quizResult.Session.PercentageScore < 50)
+            {
+                ShowTrainingRecommendations();
+            }
+        }
+
+        private void ShowTrainingRecommendations()
+        {
+            var severityLevel = quizResult.Session.PercentageScore switch
+            {
+                >= 35 => "Poor",
+                _ => "Critical"
+            };
+
+            var trainingMessage = $"📚 CYBERSECURITY TRAINING RECOMMENDATIONS 📚\n\n" +
+                                $"Your assessment score ({quizResult.Session.PercentageScore:F1}%) indicates {severityLevel.ToLower()} cybersecurity awareness.\n" +
+                                "Immediate training is recommended to improve your organization's security posture.\n\n" +
+                                "🎯 PRIORITY TRAINING AREAS:\n" +
+                                "• Password Security & Multi-Factor Authentication\n" +
+                                "• Phishing Recognition & Email Security\n" +
+                                "• Safe Web Browsing & Downloads\n" +
+                                "• Incident Response Procedures\n" +
+                                "• Data Protection & Privacy Compliance\n\n" +
+                                "📋 RECOMMENDED ACTIONS:\n" +
+                                "• Schedule mandatory cybersecurity training for all staff\n" +
+                                "• Implement regular security awareness sessions (monthly)\n" +
+                                "• Conduct simulated phishing tests\n" +
+                                "• Create security policies and procedures documentation\n" +
+                                "• Establish a security champion program\n\n" +
+                                "🏢 TRAINING RESOURCES:\n" +
+                                "• SANS Security Awareness Training\n" +
+                                "• KnowBe4 Security Awareness Platform\n" +
+                                "• NIST Cybersecurity Framework Training\n" +
+                                "• Industry-specific compliance training (HIPAA, PCI-DSS, etc.)\n" +
+                                "• Local cybersecurity training providers\n\n" +
+                                "Regular training reduces security risks by up to 70% and helps prevent costly breaches.";
+
+            MessageBox.Show(trainingMessage, 
+                          "Cybersecurity Training Recommendations", 
+                          MessageBoxButtons.OK, 
+                          MessageBoxIcon.Information);
         }
 
         private void btnClose_Click(object sender, EventArgs e)
