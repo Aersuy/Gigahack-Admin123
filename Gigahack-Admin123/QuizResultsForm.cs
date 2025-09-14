@@ -26,6 +26,9 @@ namespace Gigahack_Admin123
 
         private void DisplayResults()
         {
+            // Check for incident-related answers and show warning if needed
+            CheckForIncidentWarning();
+            
             // Display overall security score
             var maxScore = quizResult.Session.TotalQuestions * 4;
             lblScore.Text = $"Security Score: {quizResult.Session.Score}/{maxScore}";
@@ -143,6 +146,50 @@ namespace Gigahack_Admin123
                     lstResults.Items.Add($"{kvp.Key}: {kvp.Value.correct}/{kvp.Value.total} ({percentage:F1}%)");
                 }
             }
+        }
+
+        private void CheckForIncidentWarning()
+        {
+            // Check if user answered "Yes" to question 24 (cybersecurity incidents in last 12 months)
+            var incidentAnswer = quizResult.Session.Answers.FirstOrDefault(a => a.QuestionId == 24);
+            
+            if (incidentAnswer != null)
+            {
+                // Find question 24 to get the answer text
+                var incidentQuestion = questions.FirstOrDefault(q => q.Id == 24);
+                if (incidentQuestion != null && incidentAnswer.SelectedAnswerIndex < incidentQuestion.Options.Count)
+                {
+                    var selectedAnswer = incidentQuestion.Options[incidentAnswer.SelectedAnswerIndex];
+                    
+                    // Show warning if user answered "Yes" to having incidents
+                    if (selectedAnswer.Equals("Yes", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ShowIncidentReportingWarning();
+                    }
+                }
+            }
+        }
+
+        private void ShowIncidentReportingWarning()
+        {
+            var warningMessage = "⚠️ IMPORTANT LEGAL NOTICE ⚠️\n\n" +
+                               "Based on your assessment responses indicating recent cybersecurity incidents, " +
+                               "please be aware that:\n\n" +
+                               "• Many jurisdictions require organizations to report cybersecurity incidents to relevant authorities\n" +
+                               "• Reporting timeframes are typically within 24 hours of incident discovery\n" +
+                               "• Failure to report may result in regulatory penalties\n\n" +
+                               "RECOMMENDED ACTIONS:\n" +
+                               "• Contact your legal counsel immediately\n" +
+                               "• Review applicable regulations\n" +
+                               "• Prepare incident documentation\n" +
+                               "• Contact relevant authorities if required\n\n" +
+                               "This tool does not provide legal advice. Consult with qualified legal professionals " +
+                               "regarding your specific reporting obligations.";
+
+            MessageBox.Show(warningMessage, 
+                          "Incident Reporting Requirements", 
+                          MessageBoxButtons.OK, 
+                          MessageBoxIcon.Warning);
         }
 
         private void btnClose_Click(object sender, EventArgs e)
