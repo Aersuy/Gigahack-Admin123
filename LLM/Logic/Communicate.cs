@@ -36,7 +36,9 @@ DEFINITIONS:
 4. Recommendations  
 5. Conclusion  
 
-2'ND PAGE REQUIREMENTS:
+Below you have the scan data:
+";
+        const string reportPromptEnd = @" 2'ND PAGE REQUIREMENTS:
 - all text must fit on 1 page;
 - Keep it short and easy to read;
 - Use plain, simple language for non-technical readers, explain technical words in a simple way;
@@ -48,7 +50,8 @@ DEFINITIONS:
 3. Key Findings  
 4. Recommendations  
 5. Conclusion
-";
+
+Below You have the assesment data:";
         public async Task<string> SendMessage(string prompt)
         {
             var http = new HttpClient();
@@ -89,7 +92,8 @@ DEFINITIONS:
                         
                         $"TECHNICAL SCAN FINDINGS:\n" +
                         $"Critical Technical Issues:\n{string.Join("\n", data.KeyFindings.Take(5))}\n\n" +
-                         
+
+                        $"{reportPromptEnd}\n\n" +
                         // Assessment data integration
                         (data.HasAssessmentData  ?
                            $"These are answers to the questions\n" +
