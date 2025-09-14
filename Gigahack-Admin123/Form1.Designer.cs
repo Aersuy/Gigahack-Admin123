@@ -57,7 +57,7 @@
             // lblTitle
             this.lblTitle.AutoSize = true;
             this.lblTitle.Font = new Font("Segoe UI", 20F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblTitle.ForeColor = Color.FromArgb(64, 64, 64);
+            this.lblTitle.ForeColor = Color.FromArgb(220, 220, 220);
             this.lblTitle.Location = new Point(20, 15);
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new Size(350, 37);
@@ -71,7 +71,7 @@
             // lblTargetIP
             this.lblTargetIP.AutoSize = true;
             this.lblTargetIP.Font = new Font("Segoe UI", 11F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblTargetIP.ForeColor = Color.FromArgb(80, 80, 80);
+            this.lblTargetIP.ForeColor = Color.FromArgb(180, 180, 180);
             this.lblTargetIP.Location = new Point(20, 70);
             this.lblTargetIP.Name = "lblTargetIP";
             this.lblTargetIP.Size = new Size(120, 20);
@@ -79,13 +79,15 @@
             this.lblTargetIP.Text = "Target IP/Domain:";
             
             // txtTargetIP
+            this.txtTargetIP.BackColor = Color.FromArgb(42, 42, 42);
+            this.txtTargetIP.ForeColor = Color.FromArgb(220, 220, 220);
             this.txtTargetIP.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             this.txtTargetIP.Location = new Point(150, 68);
             this.txtTargetIP.Name = "txtTargetIP";
             this.txtTargetIP.Size = new Size(200, 25);
             this.txtTargetIP.TabIndex = 2;
             this.txtTargetIP.Text = "127.0.0.1";
-            this.txtTargetIP.BorderStyle = BorderStyle.FixedSingle;
+            this.txtTargetIP.BorderStyle = BorderStyle.None;
             // =============================================================================
             // CONTROL BUTTONS SECTION
             // =============================================================================
@@ -103,11 +105,11 @@
             this.btnAuditDashboard.Text = "🔍 Run Security Audit";
             this.btnAuditDashboard.UseVisualStyleBackColor = false;
             this.btnAuditDashboard.Click += new EventHandler(this.btnAuditDashboard_Click);
-            this.btnAuditDashboard.MouseEnter += (s, e) => { this.btnAuditDashboard.BackColor = Color.FromArgb(0, 100, 180); };
+            this.btnAuditDashboard.MouseEnter += (s, e) => { this.btnAuditDashboard.BackColor = Color.FromArgb(96, 165, 255); };
             this.btnAuditDashboard.MouseLeave += (s, e) => { this.btnAuditDashboard.BackColor = Color.FromArgb(0, 120, 215); };
             
             // btnGenerateReport - Utility Button
-            this.btnGenerateReport.BackColor = Color.FromArgb(16, 137, 62);
+            this.btnGenerateReport.BackColor = Color.FromArgb(0, 120, 215);
             this.btnGenerateReport.FlatAppearance.BorderSize = 0;
             this.btnGenerateReport.FlatStyle = FlatStyle.Flat;
             this.btnGenerateReport.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
@@ -119,11 +121,11 @@
             this.btnGenerateReport.Text = "📄 Generate Report";
             this.btnGenerateReport.UseVisualStyleBackColor = false;
             this.btnGenerateReport.Click += new EventHandler(this.btnGenerateReport_Click);
-            this.btnGenerateReport.MouseEnter += (s, e) => { this.btnGenerateReport.BackColor = Color.FromArgb(14, 120, 55); };
-            this.btnGenerateReport.MouseLeave += (s, e) => { this.btnGenerateReport.BackColor = Color.FromArgb(16, 137, 62); };
+            this.btnGenerateReport.MouseEnter += (s, e) => { this.btnGenerateReport.BackColor = Color.FromArgb(96, 165, 255); };
+            this.btnGenerateReport.MouseLeave += (s, e) => { this.btnGenerateReport.BackColor = Color.FromArgb(0, 120, 215); };
             
             // btnQuiz - Assessment Button
-            this.btnQuiz.BackColor = Color.FromArgb(138, 43, 226);
+            this.btnQuiz.BackColor = Color.FromArgb(0, 120, 215);
             this.btnQuiz.FlatAppearance.BorderSize = 0;
             this.btnQuiz.FlatStyle = FlatStyle.Flat;
             this.btnQuiz.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
@@ -135,11 +137,11 @@
             this.btnQuiz.Text = "📋 IT Assessment";
             this.btnQuiz.UseVisualStyleBackColor = false;
             this.btnQuiz.Click += new EventHandler(this.btnQuiz_Click);
-            this.btnQuiz.MouseEnter += (s, e) => { this.btnQuiz.BackColor = Color.FromArgb(120, 40, 200); };
-            this.btnQuiz.MouseLeave += (s, e) => { this.btnQuiz.BackColor = Color.FromArgb(138, 43, 226); };
+            this.btnQuiz.MouseEnter += (s, e) => { this.btnQuiz.BackColor = Color.FromArgb(96, 165, 255); };
+            this.btnQuiz.MouseLeave += (s, e) => { this.btnQuiz.BackColor = Color.FromArgb(0, 120, 215); };
             
             // btnClearResults
-            this.btnClearResults.BackColor = Color.FromArgb(220, 53, 69);
+            this.btnClearResults.BackColor = Color.FromArgb(196, 43, 28);
             this.btnClearResults.FlatAppearance.BorderSize = 0;
             this.btnClearResults.FlatStyle = FlatStyle.Flat;
             this.btnClearResults.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point);
@@ -151,8 +153,8 @@
             this.btnClearResults.Text = "🗑️ Clear";
             this.btnClearResults.UseVisualStyleBackColor = false;
             this.btnClearResults.Click += new EventHandler(this.btnClearResults_Click);
-            this.btnClearResults.MouseEnter += (s, e) => { this.btnClearResults.BackColor = Color.FromArgb(200, 35, 51); };
-            this.btnClearResults.MouseLeave += (s, e) => { this.btnClearResults.BackColor = Color.FromArgb(220, 53, 69); };
+            this.btnClearResults.MouseEnter += (s, e) => { this.btnClearResults.BackColor = Color.FromArgb(231, 72, 86); };
+            this.btnClearResults.MouseLeave += (s, e) => { this.btnClearResults.BackColor = Color.FromArgb(196, 43, 28); };
             
             // =============================================================================
             // PROGRESS AND STATUS SECTION
@@ -171,7 +173,7 @@
             // lblStatus
             this.lblStatus.AutoSize = true;
             this.lblStatus.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            this.lblStatus.ForeColor = Color.FromArgb(100, 100, 100);
+            this.lblStatus.ForeColor = Color.FromArgb(200, 200, 200);
             this.lblStatus.Location = new Point(20, 190);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new Size(45, 19);
@@ -184,7 +186,7 @@
             // lblResults
             this.lblResults.AutoSize = true;
             this.lblResults.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblResults.ForeColor = Color.FromArgb(64, 64, 64);
+            this.lblResults.ForeColor = Color.FromArgb(180, 180, 180);
             this.lblResults.Location = new Point(20, 220);
             this.lblResults.Name = "lblResults";
             this.lblResults.Size = new Size(65, 21);
@@ -193,7 +195,8 @@
             
             
             // lstResults
-            this.lstResults.BackColor = Color.FromArgb(250, 250, 250);
+            this.lstResults.BackColor = Color.FromArgb(42, 42, 42);
+            this.lstResults.ForeColor = Color.FromArgb(220, 220, 220);
             this.lstResults.BorderStyle = BorderStyle.FixedSingle;
             this.lstResults.Font = new Font("Consolas", 9F, FontStyle.Regular, GraphicsUnit.Point);
             this.lstResults.FormattingEnabled = true;
@@ -209,7 +212,7 @@
             // lblOverallScore
             this.lblOverallScore.AutoSize = true;
             this.lblOverallScore.Font = new Font("Segoe UI", 14F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblOverallScore.ForeColor = Color.FromArgb(64, 64, 64);
+            this.lblOverallScore.ForeColor = Color.FromArgb(180, 180, 180);
             this.lblOverallScore.Location = new Point(20, 440);
             this.lblOverallScore.Name = "lblOverallScore";
             this.lblOverallScore.Size = new Size(125, 25);
@@ -219,7 +222,7 @@
             // lblScoreValue - Large prominent score display
             this.lblScoreValue.AutoSize = true;
             this.lblScoreValue.Font = new Font("Segoe UI", 52F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblScoreValue.ForeColor = Color.FromArgb(100, 100, 100);
+            this.lblScoreValue.ForeColor = Color.FromArgb(160, 160, 160);
             this.lblScoreValue.Location = new Point(160, 415);
             this.lblScoreValue.Name = "lblScoreValue";
             this.lblScoreValue.Size = new Size(124, 94);
@@ -230,7 +233,7 @@
             // lblScoreStatus - Status text with modern styling
             this.lblScoreStatus.AutoSize = true;
             this.lblScoreStatus.Font = new Font("Segoe UI", 16F, FontStyle.Bold, GraphicsUnit.Point);
-            this.lblScoreStatus.ForeColor = Color.FromArgb(100, 100, 100);
+            this.lblScoreStatus.ForeColor = Color.FromArgb(160, 160, 160);
             this.lblScoreStatus.Location = new Point(300, 450);
             this.lblScoreStatus.Name = "lblScoreStatus";
             this.lblScoreStatus.Size = new Size(134, 30);
@@ -244,7 +247,7 @@
             // Form1
             this.AutoScaleDimensions = new SizeF(96F, 96F);
             this.AutoScaleMode = AutoScaleMode.Dpi;
-            this.BackColor = Color.White;
+            this.BackColor = Color.FromArgb(20, 20, 20);
             this.ClientSize = new Size(800, 530);
             this.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;

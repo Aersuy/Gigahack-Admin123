@@ -55,12 +55,43 @@ namespace Gigahack_Admin123
             
             // Add cleanup on form close
             this.FormClosed += Form1_FormClosed;
+            
+            // Apply Windows 11 Dark Mode Theme AFTER everything is initialized
+            this.Load += Form1_Load;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // Apply dark mode theme after the form is fully loaded
+            ApplyDarkModeTheme();
         }
 
         private void Form1_FormClosed(object? sender, FormClosedEventArgs e)
         {
             cveScanner?.Dispose();
             auditScanner?.Dispose();
+        }
+
+        /// <summary>
+        /// Apply Windows 11 Dark Mode theme to the main form
+        /// </summary>
+        private void ApplyDarkModeTheme()
+        {
+            // Forcefully apply the dark mode theme to override Designer colors
+            DarkModeTheme.ForceApplyColors(this);
+            
+            // Apply rounded corners to buttons with Windows 11 styling
+            DarkModeTheme.ApplyRoundedCorners(btnAuditDashboard, 8);
+            DarkModeTheme.ApplyRoundedCorners(btnGenerateReport, 8);
+            DarkModeTheme.ApplyRoundedCorners(btnQuiz, 8);
+            DarkModeTheme.ApplyRoundedCorners(btnClearResults, 8);
+            
+            // Apply rounded corners to input controls
+            DarkModeTheme.ApplyRoundedCorners(txtTargetIP, 6);
+            DarkModeTheme.ApplyRoundedCorners(lstResults, 8);
+            
+            // Apply refined progress bar styling
+            DarkModeTheme.ApplyToProgressBar(progressBar);
         }
 
 
@@ -696,28 +727,28 @@ namespace Gigahack_Admin123
             // Update the large score value
             lblScoreValue.Text = score.ToString();
             
-            // Set color based on compliance level
+            // Set color based on compliance level using enhanced dark mode colors
             switch (level)
             {
                 case Scans.Audit.DataClasses.ComplianceLevel.Green:
-                    lblScoreValue.ForeColor = System.Drawing.Color.Green;
+                    lblScoreValue.ForeColor = DarkModeTheme.StatusSuccess;
                     lblScoreStatus.Text = "🟢 Good Compliance";
-                    lblScoreStatus.ForeColor = System.Drawing.Color.Green;
+                    lblScoreStatus.ForeColor = DarkModeTheme.StatusSuccess;
                     break;
                 case Scans.Audit.DataClasses.ComplianceLevel.Yellow:
-                    lblScoreValue.ForeColor = System.Drawing.Color.Orange;
+                    lblScoreValue.ForeColor = DarkModeTheme.StatusWarning;
                     lblScoreStatus.Text = "🟡 Needs Improvement";
-                    lblScoreStatus.ForeColor = System.Drawing.Color.Orange;
+                    lblScoreStatus.ForeColor = DarkModeTheme.StatusWarning;
                     break;
                 case Scans.Audit.DataClasses.ComplianceLevel.Red:
-                    lblScoreValue.ForeColor = System.Drawing.Color.Red;
+                    lblScoreValue.ForeColor = DarkModeTheme.StatusError;
                     lblScoreStatus.Text = "🔴 Critical Issues";
-                    lblScoreStatus.ForeColor = System.Drawing.Color.Red;
+                    lblScoreStatus.ForeColor = DarkModeTheme.StatusError;
                     break;
                 default:
-                    lblScoreValue.ForeColor = System.Drawing.Color.Gray;
+                    lblScoreValue.ForeColor = DarkModeTheme.TextMuted;
                     lblScoreStatus.Text = "Not Scanned";
-                    lblScoreStatus.ForeColor = System.Drawing.Color.Gray;
+                    lblScoreStatus.ForeColor = DarkModeTheme.TextMuted;
                     break;
             }
         }

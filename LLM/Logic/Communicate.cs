@@ -12,37 +12,42 @@ namespace LLM.Logic
 {
     public class Communicate
     {
-        const string reportPromptBegin = @"
-You are a cybersecurity analyst preparing a one-page security report for company leadership.
+        const string reportPromptBegin = @"You are a cybersecurity analyst with 20 years of experience preparing a two-page security report for company leadership from the information provided. the first page must consist of a technical report using the data from the system scan. second page must consist of the information from the IT assesment. YOU DO NOT HALLUCINATE;
 
-Instructions:
-- Use plain, simple language for non-technical readers.
-- Keep it short and easy to read.
-- Add a blank line between every section and every bullet point.
-- Use this exact structure with clear spacing:
+DEFINITIONS:
+- ""Executive Summary""  - a simple but realistic overview of the vulnerabilities found in the company's cyber-infrastructure, aimed at high ranking company executives 3 short sentences;
+- ""Security Overview"" - key findings summed in 3 short sentences;
+- ""Key Findings"" - consist of the NetworkSecurity, SystemSecurity, PasswordSecurity and WebSecurity assessment, say where improvements are needed in 1 - 4 short sentences;
+- ""Recommendations"" - the actions needed in order to fix the vulnerabilities in key findings in 1 - 4 short sentences;
+- ""Conclusion"" - concise and relevant advice for fixing the problems found in 1 sentence;
 
-Executive Summary  
-<2 short sentences>  
+ 1'ST PAGE REQUIREMENTS:
+- all text must fit on 1 page;
+- Keep it short and easy to read;
+- Use plain, simple language for non-technical readers, explain technical words in a simple way;
+- Add 1 blank line between every finding in Key Findings and every action in Recommendations;
+- add 3 lines between the sections Executive Summary, Security Overview, Key Findings, Recommendations, Conclusion;
+- DO NOT HALLUCINATE;
+- For the first page use the following section order;
 
-Security Overview  
-<3 short sentences>  
+1. Executive Summary  
+2. Security Overview 
+3. Key Findings  
+4. Recommendations  
+5. Conclusion  
 
-Key Findings  
-- <Finding 1>  
-- <Finding 2>  
-- <Finding 3>  
+2'ND PAGE REQUIREMENTS:
+- all text must fit on 1 page;
+- Keep it short and easy to read;
+- Use plain, simple language for non-technical readers, explain technical words in a simple way;
+- Add 1 blank line between every finding in Key Findings and every action in Recommendations;
+- add 3 lines between the sections Executive Summary, Security Overview, Key Findings, Recommendations, Conclusion;
 
-Recommendations  
-- <Action 1>  
-- <Action 2>  
-- <Action 3>  
-
-Conclusion  
-<1 short sentence with final advice>  
-
-- Explain technical terms briefly in simple words.
-- Do NOT mention generating or writing the report.
-
+1. Executive Summary  
+2. Security Overview 
+3. Key Findings  
+4. Recommendations  
+5. Conclusion
 ";
         public async Task<string> SendMessage(string prompt)
         {

@@ -25,7 +25,17 @@ namespace Gigahack_Admin123
         {
             InitializeComponent();
             quiz = new Quiz();
+            
             StartNewAssessment();
+            
+            // Apply Windows 11 Dark Mode Theme AFTER everything is initialized
+            this.Load += QuizForm_Load;
+        }
+
+        private void QuizForm_Load(object sender, EventArgs e)
+        {
+            // Apply dark mode theme after the form is fully loaded
+            ApplyDarkModeTheme();
         }
 
         private void StartNewAssessment()
@@ -74,6 +84,10 @@ namespace Gigahack_Admin123
                         AutoSize = false,
                         TextAlign = ContentAlignment.MiddleLeft
                     };
+                    
+                    // Apply dark mode styling to the radio button
+                    DarkModeTheme.ApplyToRadioButton(radioButton);
+                    
                     panelOptions.Controls.Add(radioButton);
                 }
                 
@@ -183,6 +197,23 @@ namespace Gigahack_Admin123
         private void lblCategory_Click(object sender, EventArgs e)
         {
 
+        }
+
+        /// <summary>
+        /// Apply Windows 11 Dark Mode theme to the quiz form
+        /// </summary>
+        private void ApplyDarkModeTheme()
+        {
+            // Forcefully apply the dark mode theme to override Designer colors
+            DarkModeTheme.ForceApplyColors(this);
+            
+            // Apply rounded corners to buttons with Windows 11 styling
+            DarkModeTheme.ApplyRoundedCorners(btnNext, 8);
+            DarkModeTheme.ApplyRoundedCorners(btnStartOver, 8);
+            DarkModeTheme.ApplyRoundedCorners(btnViewHistory, 8);
+            
+            // Apply rounded corners to the options panel
+            DarkModeTheme.ApplyRoundedCorners(panelOptions, 8);
         }
     }
 }

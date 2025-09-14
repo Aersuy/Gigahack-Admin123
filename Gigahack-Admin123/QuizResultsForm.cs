@@ -21,7 +21,17 @@ namespace Gigahack_Admin123
             InitializeComponent();
             quizResult = result;
             questions = quizQuestions;
+            
             DisplayResults();
+            
+            // Apply Windows 11 Dark Mode Theme AFTER everything is initialized
+            this.Load += QuizResultsForm_Load;
+        }
+
+        private void QuizResultsForm_Load(object sender, EventArgs e)
+        {
+            // Apply dark mode theme after the form is fully loaded
+            ApplyDarkModeTheme();
         }
 
         private void DisplayResults()
@@ -250,6 +260,22 @@ namespace Gigahack_Admin123
         {
             this.DialogResult = DialogResult.Yes;
             this.Close();
+        }
+
+        /// <summary>
+        /// Apply Windows 11 Dark Mode theme to the quiz results form
+        /// </summary>
+        private void ApplyDarkModeTheme()
+        {
+            // Forcefully apply the dark mode theme to override Designer colors
+            DarkModeTheme.ForceApplyColors(this);
+            
+            // Apply rounded corners to buttons with Windows 11 styling
+            DarkModeTheme.ApplyRoundedCorners(btnClose, 8);
+            DarkModeTheme.ApplyRoundedCorners(btnTakeAnother, 8);
+            
+            // Apply rounded corners to the results list
+            DarkModeTheme.ApplyRoundedCorners(lstResults, 8);
         }
     }
 }

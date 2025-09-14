@@ -84,7 +84,7 @@ namespace Gigahack_Admin123
             // 
             // panelOptions
             // 
-            panelOptions.BackColor = SystemColors.Control;
+            panelOptions.BackColor = Color.FromArgb(32, 32, 32);
             panelOptions.BorderStyle = BorderStyle.FixedSingle;
             panelOptions.Location = new Point(22, 405);
             panelOptions.Margin = new Padding(6, 6, 6, 6);
@@ -110,7 +110,7 @@ namespace Gigahack_Admin123
             // 
             // btnStartOver
             // 
-            btnStartOver.BackColor = Color.FromArgb(220, 53, 69);
+            btnStartOver.BackColor = Color.FromArgb(196, 43, 28);
             btnStartOver.FlatAppearance.BorderSize = 0;
             btnStartOver.FlatStyle = FlatStyle.Flat;
             btnStartOver.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
@@ -126,7 +126,7 @@ namespace Gigahack_Admin123
             // 
             // btnViewHistory
             // 
-            btnViewHistory.BackColor = Color.FromArgb(138, 43, 226);
+            btnViewHistory.BackColor = Color.FromArgb(70, 70, 70);
             btnViewHistory.FlatAppearance.BorderSize = 0;
             btnViewHistory.FlatStyle = FlatStyle.Flat;
             btnViewHistory.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
@@ -144,6 +144,8 @@ namespace Gigahack_Admin123
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(20, 20, 20);
+            ForeColor = Color.FromArgb(248, 248, 248);
             ClientSize = new Size(1085, 877);
             Controls.Add(btnViewHistory);
             Controls.Add(btnStartOver);

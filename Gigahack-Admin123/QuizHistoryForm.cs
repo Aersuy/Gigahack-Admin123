@@ -19,7 +19,17 @@ namespace Gigahack_Admin123
         {
             InitializeComponent();
             quizHistory = history;
+            
             DisplayHistory();
+            
+            // Apply Windows 11 Dark Mode Theme AFTER everything is initialized
+            this.Load += QuizHistoryForm_Load;
+        }
+
+        private void QuizHistoryForm_Load(object sender, EventArgs e)
+        {
+            // Apply dark mode theme after the form is fully loaded
+            ApplyDarkModeTheme();
         }
 
         private void DisplayHistory()
@@ -110,6 +120,22 @@ namespace Gigahack_Admin123
                                   MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        /// <summary>
+        /// Apply Windows 11 Dark Mode theme to the quiz history form
+        /// </summary>
+        private void ApplyDarkModeTheme()
+        {
+            // Forcefully apply the dark mode theme to override Designer colors
+            DarkModeTheme.ForceApplyColors(this);
+            
+            // Apply rounded corners to buttons with Windows 11 styling
+            DarkModeTheme.ApplyRoundedCorners(btnClose, 8);
+            DarkModeTheme.ApplyRoundedCorners(btnClearHistory, 8);
+            
+            // Apply rounded corners to the history list
+            DarkModeTheme.ApplyRoundedCorners(lstHistory, 8);
         }
     }
 }

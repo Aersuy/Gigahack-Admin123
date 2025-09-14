@@ -79,6 +79,8 @@ namespace Gigahack_Admin123
             // 
             // lstResults
             // 
+            this.lstResults.BackColor = Color.FromArgb(42, 42, 42);
+            this.lstResults.ForeColor = Color.FromArgb(248, 248, 248);
             this.lstResults.Font = new Font("Consolas", 9F);
             this.lstResults.FormattingEnabled = true;
             this.lstResults.ItemHeight = 14;
@@ -89,7 +91,7 @@ namespace Gigahack_Admin123
             // 
             // btnClose
             // 
-            this.btnClose.BackColor = Color.FromArgb(100, 100, 100);
+            this.btnClose.BackColor = Color.FromArgb(55, 55, 55);
             this.btnClose.FlatAppearance.BorderSize = 0;
             this.btnClose.FlatStyle = FlatStyle.Flat;
             this.btnClose.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
@@ -104,7 +106,7 @@ namespace Gigahack_Admin123
             // 
             // btnTakeAnother
             // 
-            this.btnTakeAnother.BackColor = Color.FromArgb(0, 120, 215);
+            this.btnTakeAnother.BackColor = Color.FromArgb(60, 60, 60);
             this.btnTakeAnother.FlatAppearance.BorderSize = 0;
             this.btnTakeAnother.FlatStyle = FlatStyle.Flat;
             this.btnTakeAnother.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -121,6 +123,8 @@ namespace Gigahack_Admin123
             // 
             this.AutoScaleDimensions = new SizeF(7F, 15F);
             this.AutoScaleMode = AutoScaleMode.Font;
+            this.BackColor = Color.FromArgb(20, 20, 20);
+            this.ForeColor = Color.FromArgb(248, 248, 248);
             this.ClientSize = new Size(784, 502);
             this.Controls.Add(this.btnTakeAnother);
             this.Controls.Add(this.btnClose);
